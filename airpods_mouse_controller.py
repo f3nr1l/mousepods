@@ -1806,7 +1806,7 @@ def calibrate(cfg, cfg_path):
     import tkinter as tk
     lang = tk_language(cfg)
 
-    def L(key, **variables):
+    def L(key, /, **variables):
         return tr(key, lang, **variables)
     reader = SensorReader(cfg)
     reader.start()
@@ -1854,10 +1854,8 @@ def calibrate(cfg, cfg_path):
     def finish():
         prof = profile_from_calibration(st["up"], st["yaw"], st["pitch"], st["roll"])
         key = f"{reader.pid}_{st['source']}"
-        with open(cfg_path) as f:
-            user = json.load(f)
-        user.setdefault("profiles", {})[key] = prof
-        update_config_file(cfg_path, {"profiles": user["profiles"]})
+        # update_config_file merges into the "profiles" dict and creates config.json when missing (first run)
+        update_config_file(cfg_path, {"profiles": {key: prof}})
         instr.configure(text=L("tk.calib.done"))
         title.configure(text=L("tk.calib.saved", key=key))
         bar(1, "#3c6")
@@ -1935,7 +1933,7 @@ def settings_window(cfg_path):
     cfg = load_config(cfg_path)
     lang = tk_language(cfg)
 
-    def L(key, **variables):
+    def L(key, /, **variables):
         return tr(key, lang, **variables)
     root = tk.Tk()
     root.title(L("tk.settings.title"))

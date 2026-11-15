@@ -94,7 +94,7 @@ def apply_config(cfg, env_value=None):
     return _current
 
 
-def tr(key, lang=None, **variables):
+def tr(key, lang=None, /, **variables):
     text = load_strings(lang or _current).get(key)
     if text is None:
         log.debug("missing translation key %s", key)
