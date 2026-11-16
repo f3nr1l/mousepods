@@ -13,9 +13,12 @@
 <meta property="og:description" content="AirPods 3 head tracking on Linux, and the first public write-up of Apple RemoteHID (HID over AACP).">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://starman-tech.github.io/mousepods/">
-<meta property="og:image" content="https://starman-tech.github.io/mousepods/screenshots/app-motion.png">
+<meta property="og:image" content="https://starman-tech.github.io/mousepods/screenshots/app-overview.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="brand/icon.svg">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#fafafb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222226" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script type="application/ld+json">
@@ -32,144 +35,199 @@
 ]}
 </script>
 <style>
+/* GNOME (libadwaita) look, MousePods orange: same tokens as the app (ui/index.html, skin-adw).
+   Light and dark follow the system. */
 :root{
-  --bg:#ffffff;--alt:#f5f5f7;--card:#ffffff;--text:#1d1d1f;--text2:#6e6e73;--text3:#86868b;--line:#d2d2d7;--line2:#e8e8ed;
-  --accent:#0071e3;--accent2:#0077ed;--green:#1d9a4a;--orange:#c45500;--red:#d70015;--purple:#8944ab;
-  --c1:#0a84ff;--c2:#5e5ce6;--c3:#bf5af2;--c4:#ff375f;--c5:#ff9f0a;--c6:#30d158;--c7:#64d2ff;--c8:#ac8e68;
-  --r:18px;--shadow:0 1px 2px rgba(0,0,0,.04),0 6px 24px rgba(0,0,0,.06);
+  color-scheme:light dark;
+  --bg:#fafafb;--alt:#ebebed;--card:#ffffff;--field:#f2f2f4;--btn:#e3e3e6;--btn-h:#d8d8dc;
+  --text:#1e1e20;--text2:#5e5c64;--text3:#67656d;--line:rgba(0,0,0,.08);--sep:rgba(0,0,0,.07);--border:#dcdce0;
+  --accent:#f54f1b;--accent-text:#c0380e;--on-accent:#1b0b05;--accent-soft:rgba(245,79,27,.10);--accent-ring:rgba(245,79,27,.45);
+  --ok:#1b7340;--warn:#8a5d00;--no:#c01c28;
+  --nav:rgba(250,250,251,.82);--plot:#f2f2f4;--plot-line:#dedee3;
+  --ink:#1e1e20;--ink2:#2e2e33;--ink3:#414147;--ink-text:#f2f2f3;--ink-text2:#c0c0c6;--ink-accent:#ff8f66;
+  --gx:#e01b24;--gy:#26a269;--gz:#1c71d8;
+  --d-n:#f2f2f4;--d-n-s:#d4d4d9;--d-a:#feeae2;--d-a-s:#f7a988;--d-p:#f3e9f6;--d-p-s:#cfa6dc;--d-g:#e4f3ea;--d-g-s:#9fd3b4;
+  --d-text:#1e1e20;--d-text2:#5e5c64;--d-arrow:#8a8890;
+  --r:12px;
 }
+@media (prefers-color-scheme: dark){:root{
+  --bg:#222226;--alt:#2e2e33;--card:#36363b;--field:#2b2b30;--btn:#414147;--btn-h:#4a4a50;
+  --text:#f2f2f3;--text2:#c0c0c6;--text3:#a8a8ae;--line:rgba(255,255,255,.08);--sep:rgba(255,255,255,.07);--border:#1b1b1e;
+  --accent-text:#ff8f66;--accent-soft:rgba(245,79,27,.14);
+  --ok:#57e389;--warn:#e5a50a;--no:#ff7b63;
+  --nav:rgba(34,34,38,.82);--plot:#2b2b30;--plot-line:#4a4a50;
+  --ink:#18181b;--ink2:#26262a;--ink3:#3a3a40;
+  --gx:#ff7b63;--gy:#57e389;--gz:#62a0ea;
+  --d-n:#414147;--d-n-s:#55555c;--d-a:#4a2a1e;--d-a-s:#a3502e;--d-p:#3e2f45;--d-p-s:#7c5a8c;--d-g:#24402f;--d-g-s:#3f7a55;
+  --d-text:#f2f2f3;--d-text2:#c0c0c6;--d-arrow:#8f8f96;
+}}
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;scroll-padding-top:64px}
-body{font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);
-  -webkit-font-smoothing:antialiased;line-height:1.55;font-size:17px;letter-spacing:-.011em}
-a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+html{scroll-behavior:smooth;scroll-padding-top:64px;background:var(--bg)}
+body{font-family:"Adwaita Sans","Inter","Cantarell",system-ui,sans-serif;background:var(--bg);color:var(--text);
+  -webkit-font-smoothing:antialiased;line-height:1.55;font-size:17px;letter-spacing:-.006em;overflow-x:hidden}
+a{color:var(--accent-text);text-decoration:none}a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
-.mono,code,pre{font-family:"JetBrains Mono","SF Mono",ui-monospace,Menlo,monospace}
-code{font-size:.86em;background:var(--alt);padding:2px 6px;border-radius:6px;border:1px solid var(--line2)}
-/* ---------- navigation */
-nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.8);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line2)}
-nav .wrap{display:flex;align-items:center;height:56px;gap:26px;font-size:14px}
-nav .brand{display:flex;align-items:center;gap:9px;font-weight:700;color:var(--text);margin-right:auto;font-size:16px}
+@media(max-width:600px){.wrap{padding:0 16px}}
+.mono,code,pre{font-family:"Adwaita Mono","JetBrains Mono","Source Code Pro",ui-monospace,monospace}
+code{font-size:.86em;background:var(--field);padding:2px 6px;border-radius:6px;border:1px solid var(--line);overflow-wrap:anywhere}
+/* ---------- navigation (header bar) */
+nav{position:sticky;top:0;z-index:20;background:var(--nav);backdrop-filter:saturate(160%) blur(18px);-webkit-backdrop-filter:saturate(160%) blur(18px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;height:56px;gap:4px;font-size:14.5px}
+nav .brand{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--text);margin-right:auto;font-size:16px;border-radius:8px}
+nav .brand img{border-radius:7px}
 nav .brand:hover{text-decoration:none}
-nav a.l{color:var(--text2)}nav a.l:hover{color:var(--text);text-decoration:none}
-nav .gh{background:var(--text);color:#fff;padding:7px 14px;border-radius:999px;font-weight:600}
-nav .gh:hover{text-decoration:none;opacity:.88}
-@media(max-width:860px){nav a.l{display:none}}
+nav a.l{color:var(--text);font-weight:500;padding:6px 12px;border-radius:8px}nav a.l:hover{background:var(--line);text-decoration:none}
+nav .gh{background:var(--accent);color:var(--on-accent);padding:7px 16px;border-radius:999px;font-weight:700;margin-left:10px}
+nav .gh:hover{text-decoration:none;filter:brightness(1.06)}
+@media(max-width:960px){nav a.l{display:none}}
 /* ---------- sections */
-section{padding:96px 0}
+section{padding:88px 0}
 section.alt{background:var(--alt)}
-section.dark{background:#000;color:#f5f5f7}
-.eyebrow{font-size:14px;font-weight:600;color:var(--accent);letter-spacing:0;margin-bottom:12px}
-.dark .eyebrow{color:#2997ff}
-h1{font-size:clamp(48px,7.4vw,88px);line-height:1.02;letter-spacing:-.045em;font-weight:800}
-h2{font-size:clamp(34px,4.6vw,52px);line-height:1.07;letter-spacing:-.035em;font-weight:750;margin-bottom:16px}
-h3{font-size:21px;letter-spacing:-.02em;font-weight:650;margin-bottom:8px}
-.lead{font-size:clamp(19px,2vw,22px);color:var(--text2);max-width:760px;line-height:1.45}
-.dark .lead{color:#a1a1a6}
+section.dark{background:var(--ink);color:var(--ink-text)}
+.eyebrow{font-size:14px;font-weight:700;color:var(--accent-text);letter-spacing:0;margin-bottom:12px}
+.dark .eyebrow{color:var(--ink-accent)}
+.dark a{color:var(--ink-accent)}
+h1{font-size:clamp(46px,7.4vw,88px);line-height:1.02;letter-spacing:-.04em;font-weight:800}
+h2{font-size:clamp(32px,4.6vw,52px);line-height:1.08;letter-spacing:-.03em;font-weight:800;margin-bottom:16px}
+h3{font-size:20px;letter-spacing:-.015em;font-weight:700;margin-bottom:8px}
+.lead{font-size:clamp(18px,2vw,21px);color:var(--text2);max-width:760px;line-height:1.5}
+.dark .lead{color:var(--ink-text2)}
 .center{text-align:center}.center .lead{margin:0 auto}
-.head{margin-bottom:48px}
+.head{margin-bottom:44px}
 /* ---------- hero */
-.hero{padding:84px 0 40px;text-align:center}
-.hero .tagline{display:inline-flex;gap:8px;align-items:center;font-size:13px;font-weight:600;color:var(--text2);background:var(--alt);border:1px solid var(--line2);padding:6px 14px;border-radius:999px;margin-bottom:26px}
-.hero .tagline b{color:var(--green)}
-.hero h1 span{background:linear-gradient(92deg,#0071e3 10%,#8944ab 55%,#e3004f 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero{padding:80px 0 40px;text-align:center}
+.hero .tagline{display:inline-flex;gap:8px;align-items:center;font-size:13px;font-weight:600;color:var(--text2);background:var(--btn);padding:6px 14px;border-radius:999px;margin-bottom:26px}
+.hero .tagline b{color:var(--accent)}
+.hero h1 span{background:linear-gradient(92deg,#ff7a3d 5%,#f54f1b 45%,#c0380e 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+@media (prefers-color-scheme: dark){.hero h1 span{background-image:linear-gradient(92deg,#ffb38f 5%,#ff8f66 40%,#f54f1b 95%)}}
 .hero .lead{margin:24px auto 0;max-width:780px}
 .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:34px}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:999px;font-weight:600;font-size:16px;border:0;cursor:pointer;transition:.15s}
-.btn.p{background:var(--accent);color:#fff}.btn.p:hover{background:var(--accent2);text-decoration:none}
-.btn.s{background:transparent;color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}.btn.s:hover{background:rgba(0,113,227,.06);text-decoration:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 26px;border-radius:999px;font-weight:700;font-size:16px;border:0;cursor:pointer;transition:background .15s,filter .15s;font-family:inherit}
+.btn:hover{text-decoration:none}
+.btn.p{background:var(--accent);color:var(--on-accent)}.btn.p:hover{filter:brightness(1.06)}
+.btn.s{background:var(--btn);color:var(--text)}.btn.s:hover{background:var(--btn-h)}
 .meta{margin-top:20px;font-size:14px;color:var(--text3)}
-.window{max-width:1000px;margin:56px auto 0;border-radius:14px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.08);background:#1c1c1e}
-.window .bar{height:30px;background:#2c2c2e;display:flex;align-items:center;gap:7px;padding:0 12px}
-.window .bar i{width:11px;height:11px;border-radius:50%;background:#ff5f57}.window .bar i:nth-child(2){background:#febc2e}.window .bar i:nth-child(3){background:#28c840}
-.window .bar span{margin-left:auto;margin-right:auto;color:#98989d;font-size:12px;font-weight:500;transform:translateX(-24px)}
+.window{max-width:1000px;margin:56px auto 0;border-radius:var(--r);overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.10);background:#222226}
+.window .bar{height:40px;background:#2e2e33;display:flex;align-items:center;gap:7px;padding:0 10px;border-bottom:1px solid #1b1b1e}
+.window .bar i{display:none}
+.window .bar i:nth-child(3){display:grid;place-items:center;order:2;width:22px;height:22px;border-radius:50%;background:#414147;flex:none}
+.window .bar i:nth-child(3):before{content:"";width:10px;height:10px;background:
+  linear-gradient(45deg,transparent 44%,#f2f2f3 44% 56%,transparent 56%),linear-gradient(-45deg,transparent 44%,#f2f2f3 44% 56%,transparent 56%)}
+.window .bar span{flex:1;order:1;text-align:center;color:#f2f2f3;font-size:13px;font-weight:700;padding-left:29px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .window img{display:block;width:100%}
 /* ---------- stats */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
-.stats div{padding:34px 22px;text-align:center;border-right:1px solid var(--line2)}.stats div:last-child{border-right:0}
-.stats b{display:block;font-size:40px;font-weight:800;letter-spacing:-.04em;line-height:1.1}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border-radius:var(--r);border:1px solid var(--line);overflow:hidden;margin-top:8px}
+.stats div{padding:30px 22px;text-align:center;border-right:1px solid var(--sep)}.stats div:last-child{border-right:0}
+.stats b{display:block;font-size:38px;font-weight:800;letter-spacing:-.035em;line-height:1.1;color:var(--text)}
 .stats span{color:var(--text2);font-size:15px}
-@media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr)}.stats div:nth-child(2){border-right:0}.stats div:nth-child(-n+2){border-bottom:1px solid var(--line2)}}
-/* ---------- tableaux */
-.tbl{width:100%;border-collapse:collapse;background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);font-size:16px}
-.tbl th{text-align:left;font-size:13px;font-weight:600;color:var(--text2);padding:14px 20px;background:var(--alt);border-bottom:1px solid var(--line2)}
-.tbl td{padding:15px 20px;border-bottom:1px solid var(--line2);vertical-align:top}
+@media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr)}.stats div:nth-child(2){border-right:0}.stats div:nth-child(-n+2){border-bottom:1px solid var(--sep)}}
+@media(max-width:600px){.stats div{padding:22px 12px}.stats b{font-size:30px}}
+/* ---------- tables (boxed lists) */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border-radius:var(--r);overflow:hidden;border:1px solid var(--line);font-size:16px}
+.tbl th{text-align:left;font-size:13px;font-weight:700;color:var(--text2);padding:12px 20px;background:var(--card);border-bottom:1px solid var(--sep)}
+.tbl td{padding:14px 20px;border-bottom:1px solid var(--sep);vertical-align:top}
 .tbl tr:last-child td{border-bottom:0}
-.tbl tr.us td{background:#f0f7ff}
-.st{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;white-space:nowrap}
-.st:before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
-.st.no{color:var(--text3)}.st.yes{color:var(--green)}.st.warn{color:var(--orange)}
-/* ---------- cartes */
-.grid{display:grid;gap:20px}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
-@media(max-width:900px){.g3,.g2{grid-template-columns:1fr}}
-.card{background:var(--card);border-radius:var(--r);padding:30px;box-shadow:var(--shadow);border:1px solid var(--line2)}
+.tbl small{color:var(--text3)}
+.tbl code{white-space:nowrap;overflow-wrap:normal}
+.tbl tr.us td{background:var(--accent-soft)}
+.tbl tr.us td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+/* narrow screens: the table scrolls inside its box rather than breaking words */
+@media(max-width:600px){.tbl{display:block;overflow-x:auto;font-size:14.5px}.tbl tbody{display:table;width:100%}.tbl th{padding:10px 10px}.tbl td{padding:12px 10px}}
+.st{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:700;white-space:nowrap}
+.st:before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.st.no{color:var(--no)}.st.yes{color:var(--ok)}.st.warn{color:var(--warn)}
+@media(max-width:600px){.st{white-space:normal;align-items:baseline}.st:before{transform:translateY(-1px)}}
+/* ---------- cards */
+.grid{display:grid;gap:16px}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:900px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border-radius:var(--r);padding:28px;border:1px solid var(--line);box-shadow:none;min-width:0}
+@media(max-width:600px){.card{padding:20px}}
 .card p{color:var(--text2);font-size:16px}
-.card .n{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--text);color:#fff;font-weight:700;font-size:15px;margin-bottom:18px}
-.card .ev{margin-top:16px;padding-top:14px;border-top:1px solid var(--line2);font-size:13.5px;color:var(--text3)}
-.new{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;color:#fff;background:var(--green);padding:2px 8px;border-radius:999px;margin-left:8px;vertical-align:3px}
-/* ---------- schéma */
-.diagram{background:var(--card);border-radius:var(--r);padding:36px 20px;box-shadow:var(--shadow);border:1px solid var(--line2);overflow-x:auto}
+.card .n{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--on-accent);font-weight:800;font-size:15px;margin-bottom:18px}
+.card .ev{margin-top:16px;padding-top:14px;border-top:1px solid var(--sep);font-size:13.5px;color:var(--text3)}
+.new{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--accent-text);background:var(--accent-soft);padding:2px 8px;border-radius:999px;margin-left:8px;vertical-align:3px}
+/* ---------- diagram */
+.diagram{background:var(--card);border-radius:var(--r);padding:32px 20px;border:1px solid var(--line);overflow-x:auto}
 .diagram svg{display:block;min-width:900px;width:100%;height:auto}
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:20px}
+.diagram .dt{fill:var(--d-text)}.diagram .ds{fill:var(--d-text2)}.diagram .dl{fill:var(--d-arrow)}
+.diagram .bn{fill:var(--d-n);stroke:var(--d-n-s)}.diagram .ba{fill:var(--d-a);stroke:var(--d-a-s)}.diagram .bp{fill:var(--d-p);stroke:var(--d-p-s)}
+.diagram .bg{fill:var(--d-g);stroke:var(--d-g-s)}.diagram .bx{fill:var(--accent)}.diagram .bxt{fill:var(--on-accent)}
+.diagram .arr{stroke:var(--d-arrow)}.diagram .arh{fill:var(--d-arrow)}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:16px}
 @media(max-width:900px){.steps{grid-template-columns:1fr 1fr}}
-.steps div{background:var(--card);border-radius:14px;padding:20px;border:1px solid var(--line2)}
+@media(max-width:600px){.steps{grid-template-columns:minmax(0,1fr)}}
+.steps div{background:var(--card);border-radius:var(--r);padding:20px;border:1px solid var(--line)}
 .steps b{display:block;font-size:15px;margin-bottom:4px}.steps span{font-size:14px;color:var(--text2)}
-/* ---------- octets */
+/* ---------- bytes */
 .bytes{display:flex;flex-wrap:wrap;gap:6px;margin:34px 0 26px}
 .byte{display:flex;flex-direction:column;align-items:center;gap:8px}
-.byte .hx{display:flex;gap:3px;padding:10px 12px;border-radius:12px;font:600 18px "JetBrains Mono",monospace}
-.byte .lb{font-size:12px;color:#a1a1a6;text-align:center;max-width:150px;line-height:1.3}
-.legend2{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 28px;font-size:15px;color:#a1a1a6}
-@media(max-width:900px){.legend2{grid-template-columns:1fr}}
-.legend2 b{color:#f5f5f7;font-weight:600}
-.seq{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:40px}
+.byte .hx{display:flex;gap:3px;padding:10px 12px;border-radius:10px;font:600 18px "Adwaita Mono","JetBrains Mono",monospace}
+@media(max-width:600px){.byte .hx{font-size:15px;padding:8px 9px}}
+.byte .lb{font-size:12px;color:var(--ink-text2);text-align:center;max-width:150px;line-height:1.3}
+.legend2{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 28px;font-size:15px;color:var(--ink-text2)}
+@media(max-width:900px){.legend2{grid-template-columns:minmax(0,1fr)}}
+.legend2 b{color:var(--ink-text);font-weight:700}
+.seq{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:40px}
 @media(max-width:900px){.seq{grid-template-columns:1fr 1fr}}
-.seq>div{background:#1c1c1e;border-radius:16px;padding:22px;border:1px solid #2c2c2e}
-.seq .d{font-size:12px;font-weight:600;color:#2997ff;margin-bottom:8px}
-.seq b{display:block;color:#f5f5f7;margin-bottom:6px}.seq span{font-size:14px;color:#a1a1a6}
-.seq code,.dark code{background:#2c2c2e;border-color:#3a3a3c;color:#f5f5f7}
-/* ---------- démo */
-.demo{display:grid;grid-template-columns:1fr 1.35fr;gap:20px}@media(max-width:900px){.demo{grid-template-columns:1fr}}
-.stage{height:330px;perspective:900px;display:grid;place-items:center;border-radius:14px;background:radial-gradient(circle at 50% 42%,#ffffff,#ececf1 70%)}
+@media(max-width:600px){.seq{grid-template-columns:minmax(0,1fr)}}
+.seq>div{background:var(--ink2);border-radius:var(--r);padding:22px}
+.seq .d{font-size:12px;font-weight:700;color:var(--ink-accent);margin-bottom:8px}
+.seq b{display:block;color:var(--ink-text);margin-bottom:6px}.seq span{font-size:14px;color:var(--ink-text2)}
+.seq code,.dark code{background:var(--ink3);border-color:transparent;color:var(--ink-text)}
+/* ---------- demo */
+.demo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:16px}@media(max-width:900px){.demo{grid-template-columns:minmax(0,1fr)}}
+.stage{height:330px;perspective:900px;display:grid;place-items:center;border-radius:10px;background:var(--plot);overflow:hidden}
 .pod{position:relative;width:1px;height:1px;transform-style:preserve-3d}
 .part{position:absolute;transform-style:preserve-3d}
-.face{position:absolute;background:linear-gradient(160deg,#ffffff,#d9d9df);border:1px solid rgba(0,0,0,.09)}
+.face{position:absolute;background:linear-gradient(160deg,#ffffff,#d4d4d9);border:1px solid rgba(0,0,0,.09)}
 .ctrl{display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap;font-size:14px;color:var(--text2)}
-.ctrl button{border:1px solid var(--line);background:#fff;color:var(--text);font:inherit;font-weight:600;padding:7px 14px;border-radius:999px;cursor:pointer}
-.pill{display:inline-block;padding:4px 11px;border-radius:999px;background:var(--alt);font-size:13px;font-weight:600;color:var(--text)}
+.ctrl button{border:0;background:var(--accent);color:var(--on-accent);font:inherit;font-weight:700;min-height:34px;padding:0 18px;border-radius:999px;cursor:pointer}
+.ctrl button:hover{filter:brightness(1.06)}
+.pill{display:inline-block;padding:4px 11px;border-radius:999px;background:var(--btn);font-size:13px;font-weight:600;color:var(--text)}
 canvas{width:100%;display:block}
 .legend{display:flex;gap:18px;color:var(--text2);font-size:13px;margin-top:10px;flex-wrap:wrap}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
-/* ---------- décodeur */
-textarea{width:100%;min-height:96px;font:14px "JetBrains Mono",monospace;background:var(--alt);color:var(--text);border:1px solid var(--line2);border-radius:14px;padding:16px;resize:vertical;outline:none}
-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(0,113,227,.12)}
+/* ---------- decoder */
+textarea{width:100%;min-height:96px;font:14px "Adwaita Mono","JetBrains Mono",monospace;background:var(--field);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:14px 16px;resize:vertical;outline:none}
+textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-ring)}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.chips button{border:1px solid var(--line);background:#fff;color:var(--text);font:inherit;font-size:14px;font-weight:500;padding:7px 14px;border-radius:999px;cursor:pointer}
-.chips button:hover{border-color:var(--accent);color:var(--accent)}
-.out{margin-top:18px}
+.chips button{border:0;background:var(--btn);color:var(--text);font:inherit;font-size:14px;font-weight:600;min-height:34px;padding:0 14px;border-radius:999px;cursor:pointer;transition:background .15s}
+.chips button:hover{background:var(--btn-h)}
+.out{margin-top:18px;overflow-x:auto}
 .out table{width:100%;border-collapse:collapse;font-size:15px}
-.out td{padding:9px 12px;border-bottom:1px solid var(--line2);vertical-align:top}
+.out td{padding:9px 12px;border-bottom:1px solid var(--sep);vertical-align:top;overflow-wrap:anywhere}
 .out td.k{color:var(--text2);white-space:nowrap;width:220px}
-.out tr.h td{background:var(--alt);font-weight:600;font-size:13px;color:var(--text2)}
-/* ---------- galerie */
-.shots{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}@media(max-width:900px){.shots{grid-template-columns:1fr}}
-.shots figure{border-radius:12px;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.14),0 0 0 1px rgba(0,0,0,.06)}
+@media(max-width:600px){.out table{font-size:13.5px}.out td{padding:8px 6px}.out td.k{white-space:normal;width:40%}}
+.out tr.h td{background:var(--field);font-weight:700;font-size:13px;color:var(--text2)}
+/* ---------- gallery */
+.shots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}@media(max-width:900px){.shots{grid-template-columns:minmax(0,1fr)}}
+.shots figure{border-radius:var(--r);overflow:hidden;background:var(--card);border:1px solid var(--line)}
 .shots img{display:block;width:100%}
-.shots figcaption{background:#fff;padding:12px 16px;font-size:14px;color:var(--text2)}
+.shots figcaption{background:var(--card);padding:12px 16px;font-size:14px;color:var(--text2);border-top:1px solid var(--sep)}
+.big-shot{display:block;width:100%;max-width:960px;height:auto;margin:0 auto 34px;border-radius:var(--r);border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.16)}
+.try{text-align:center;margin:-10px 0 34px}.try small{display:block;margin-top:10px;color:var(--text2);font-size:14px}
 /* ---------- code */
-.code{position:relative;background:#1d1d1f;color:#f5f5f7;border-radius:16px;padding:22px 24px;font-size:14.5px;line-height:1.75;overflow-x:auto}
-.code .c{color:#86868b}
-.copy{position:absolute;top:12px;right:12px;border:0;background:#3a3a3c;color:#f5f5f7;font:600 12px Inter,sans-serif;padding:6px 11px;border-radius:8px;cursor:pointer}
-/* ---------- FAQ */
-details{border-bottom:1px solid var(--line2);padding:20px 0}
-details summary{cursor:pointer;font-weight:600;font-size:18px;list-style:none;display:flex;justify-content:space-between;gap:20px}
+.code{position:relative;background:#1e1e20;color:#f2f2f3;border-radius:var(--r);padding:22px 24px;font:14px/1.75 "Adwaita Mono","JetBrains Mono","Source Code Pro",ui-monospace,monospace;white-space:pre;overflow-x:auto;border:1px solid var(--line);min-width:0}
+@media (prefers-color-scheme: dark){.code{background:#18181b}}
+@media(max-width:600px){.code{font-size:12px;padding:18px 16px}}
+.code .c{color:#a8a8ae}
+.copy{position:absolute;top:12px;right:12px;border:0;background:#414147;color:#f2f2f3;font:700 12px "Adwaita Sans",Inter,sans-serif;padding:6px 12px;border-radius:999px;cursor:pointer}
+.copy:hover{background:#4a4a50}
+/* ---------- FAQ (boxed list of expander rows) */
+details{background:var(--card);border:1px solid var(--line);border-top:0;padding:0}
+.head+details{border-top:1px solid var(--line);border-radius:var(--r) var(--r) 0 0}
+details:last-child{border-radius:0 0 var(--r) var(--r)}
+details summary{cursor:pointer;font-weight:600;font-size:17px;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:16px 20px;border-radius:inherit}
+details summary:hover{background:var(--line)}
 details summary::-webkit-details-marker{display:none}
-details summary:after{content:"+";font-weight:400;color:var(--text2);font-size:24px;line-height:1}
-details[open] summary:after{content:"−"}
-details p{color:var(--text2);margin-top:10px;max-width:820px}
+details summary:after{content:"";flex:none;width:8px;height:8px;border-right:2px solid var(--text2);border-bottom:2px solid var(--text2);transform:rotate(45deg) translate(-2px,-2px);transition:transform .2s}
+details[open] summary:after{transform:rotate(-135deg) translate(-2px,-2px)}
+details[open] summary{border-bottom-left-radius:0;border-bottom-right-radius:0}
+details p{color:var(--text2);padding:0 20px 18px;max-width:840px;font-size:16px}
 /* ---------- licence */
 .lic .card h3{display:flex;align-items:center;gap:10px}
-.quote{background:var(--alt);border-left:3px solid var(--accent);border-radius:10px;padding:16px 18px;font-size:15px;margin-top:14px}
-footer{padding:44px 0 64px;color:var(--text3);font-size:13px;border-top:1px solid var(--line2)}
+.quote{background:var(--field);border-left:3px solid var(--accent);border-radius:10px;padding:16px 18px;font-size:15px;margin-top:14px;overflow-wrap:anywhere}
+footer{padding:44px 0 64px;color:var(--text3);font-size:13px;border-top:1px solid var(--line)}
 footer .wrap{display:flex;gap:20px;flex-wrap:wrap;justify-content:space-between}
 </style>
 </head>
@@ -242,17 +300,17 @@ footer .wrap{display:flex;gap:20px;flex-wrap:wrap;justify-content:space-between}
   <div class="head"><div class="eyebrow">How it works</div><h2>From a bud to a cursor.</h2>
     <p class="lead">One Python process, no kernel module, no root. Gravity sets what "horizontal" means, so the result doesn't depend on how the bud is held.</p></div>
   <div class="diagram">
-  <svg viewBox="0 0 1000 170" font-family="Inter, sans-serif">
-    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#86868b"/></marker></defs>
-    <g font-size="15" font-weight="650" fill="#1d1d1f" text-anchor="middle">
-      <rect x="10" y="40" width="160" height="90" rx="16" fill="#f5f5f7" stroke="#d2d2d7"/><text x="90" y="80">AirPods</text><text x="90" y="102" font-size="12.5" font-weight="500" fill="#6e6e73">3 or Pro 2</text>
-      <rect x="215" y="40" width="160" height="90" rx="16" fill="#eef5ff" stroke="#9cc5f5"/><text x="295" y="80">L2CAP 0x1001</text><text x="295" y="102" font-size="12.5" font-weight="500" fill="#6e6e73">AACP · MTU 2582</text>
-      <rect x="420" y="40" width="160" height="90" rx="16" fill="#f4efff" stroke="#c9b5ec"/><text x="500" y="80">RemoteHID</text><text x="500" y="102" font-size="12.5" font-weight="500" fill="#6e6e73">or SensorDataWX</text>
-      <rect x="625" y="40" width="160" height="90" rx="16" fill="#eefaf2" stroke="#a6dcb7"/><text x="705" y="80">Motion engine</text><text x="705" y="102" font-size="12.5" font-weight="500" fill="#6e6e73">gyro + gravity</text>
-      <rect x="830" y="40" width="160" height="90" rx="16" fill="#1d1d1f"/><text x="910" y="80" fill="#fff">Cursor</text><text x="910" y="102" font-size="12.5" font-weight="500" fill="#a1a1a6">uinput · 120 Hz</text>
+  <svg viewBox="0 0 1000 170" font-family="Adwaita Sans, Inter, sans-serif" role="img" aria-label="AirPods, L2CAP 0x1001, RemoteHID or SensorDataWX, motion engine, cursor">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="arh" d="M0 0L10 5L0 10z"/></marker></defs>
+    <g font-size="15" font-weight="700" text-anchor="middle">
+      <rect class="bn" x="10" y="40" width="160" height="90" rx="12"/><text class="dt" x="90" y="80">AirPods</text><text class="ds" x="90" y="102" font-size="12.5" font-weight="500">3 or Pro 2</text>
+      <rect class="ba" x="215" y="40" width="160" height="90" rx="12"/><text class="dt" x="295" y="80">L2CAP 0x1001</text><text class="ds" x="295" y="102" font-size="12.5" font-weight="500">AACP · MTU 2582</text>
+      <rect class="bp" x="420" y="40" width="160" height="90" rx="12"/><text class="dt" x="500" y="80">RemoteHID</text><text class="ds" x="500" y="102" font-size="12.5" font-weight="500">or SensorDataWX</text>
+      <rect class="bg" x="625" y="40" width="160" height="90" rx="12"/><text class="dt" x="705" y="80">Motion engine</text><text class="ds" x="705" y="102" font-size="12.5" font-weight="500">gyro + gravity</text>
+      <rect class="bx" x="830" y="40" width="160" height="90" rx="12"/><text class="bxt" x="910" y="80">Cursor</text><text class="bxt" x="910" y="102" font-size="12.5" font-weight="500" opacity=".8">uinput · 120 Hz</text>
     </g>
-    <g stroke="#86868b" stroke-width="2" marker-end="url(#ar)"><line x1="172" y1="85" x2="211" y2="85"/><line x1="377" y1="85" x2="416" y2="85"/><line x1="582" y1="85" x2="621" y2="85"/><line x1="787" y1="85" x2="826" y2="85"/></g>
-    <g font-size="12" fill="#86868b" text-anchor="middle"><text x="192" y="30">Bluetooth</text><text x="397" y="30">frames</text><text x="602" y="30">58-byte block</text><text x="807" y="30">dx, dy</text>
+    <g class="arr" stroke-width="2" marker-end="url(#ar)"><line x1="172" y1="85" x2="211" y2="85"/><line x1="377" y1="85" x2="416" y2="85"/><line x1="582" y1="85" x2="621" y2="85"/><line x1="787" y1="85" x2="826" y2="85"/></g>
+    <g class="ds" font-size="12" text-anchor="middle"><text x="192" y="30">Bluetooth</text><text x="397" y="30">frames</text><text x="602" y="30">58-byte block</text><text x="807" y="30">dx, dy</text>
       <text x="500" y="160">auto-detected per model</text><text x="705" y="160">yaw · pitch · roll, drift-corrected</text></g>
   </svg></div>
   <div class="steps">
@@ -266,7 +324,7 @@ footer .wrap{display:flex;gap:20px;flex-wrap:wrap;justify-content:space-between}
 <!-- ======================================== PROTOCOL -->
 <section id="protocol" class="dark"><div class="wrap">
   <div class="head"><div class="eyebrow">The protocol</div><h2>One frame starts the sensors.</h2>
-    <p class="lead">This is the exact message that makes AirPods 3 stream their motion at 100 Hz, decoded byte by byte. The full specification is in <a href="https://github.com/starman-tech/mousepods/blob/main/docs/REMOTEHID-PROTOCOL.md" style="color:#2997ff">REMOTEHID-PROTOCOL.md</a>.</p></div>
+    <p class="lead">This is the exact message that makes AirPods 3 stream their motion at 100 Hz, decoded byte by byte. The full specification is in <a href="https://github.com/starman-tech/mousepods/blob/main/docs/REMOTEHID-PROTOCOL.md">REMOTEHID-PROTOCOL.md</a>.</p></div>
   <div class="bytes" id="bytes"></div>
   <div class="legend2">
     <div><b>Sub-packet header</b>: a little-endian u32. Bits 0–6 = device ID (7 = <code>devmotion6</code>), bits 7–16 = length (10), bits 17–19 = kind (3 = SetReport).</div>
@@ -306,7 +364,7 @@ footer .wrap{display:flex;gap:20px;flex-wrap:wrap;justify-content:space-between}
     <div class="card"><div class="stage"><div class="pod" id="pod"></div></div>
       <div class="ctrl"><button id="play">Pause</button><span class="pill" id="phase">—</span><span class="mono" id="time"></span></div></div>
     <div class="card"><canvas id="chart" height="310"></canvas>
-      <div class="legend"><span><i style="background:#0a84ff"></i>gyro X</span><span><i style="background:#30d158"></i>gyro Y</span><span><i style="background:#ff9f0a"></i>gyro Z</span><span>°/s, sensor frame</span></div></div>
+      <div class="legend"><span><i style="background:var(--gx)"></i>gyro X</span><span><i style="background:var(--gy)"></i>gyro Y</span><span><i style="background:var(--gz)"></i>gyro Z</span><span>°/s, sensor frame</span></div></div>
   </div>
 </div></section>
 
@@ -324,10 +382,10 @@ footer .wrap{display:flex;gap:20px;flex-wrap:wrap;justify-content:space-between}
 <!-- ======================================== APP -->
 <section class="alt"><div class="wrap">
   <div class="head center"><div class="eyebrow">The app</div><h2>Everything, in one window.</h2>
-    <p class="lead">A local app in the style of macOS Settings. Battery, live 3D orientation, every setting applied instantly, guided calibration, and an explorer to start and query each sensor.</p></div>
+    <p class="lead">A local app in the GNOME style, light and dark. Live head position, battery, live 3D orientation, every setting applied instantly, guided calibration, and an explorer to start and query each sensor.</p></div>
   <div class="shots">
-    <figure><img src="screenshots/app-overview.png" alt="Overview"><figcaption>Overview: batteries, mode, link quality</figcaption></figure>
-    <figure><img src="screenshots/app-sensors.png" alt="Sensor explorer"><figcaption>Sensor explorer: every RemoteHID device</figcaption></figure>
+    <figure><img src="screenshots/app-overview-light.png" alt="Overview"><figcaption>Overview: live head position, battery, mouse</figcaption></figure>
+    <figure><img src="screenshots/app-settings.png" alt="Settings"><figcaption>Settings: style, colors, language, start at login</figcaption></figure>
     <figure><img src="screenshots/app-calib.png" alt="Calibration"><figcaption>Calibration: head, bud in hand, pointer corners</figcaption></figure>
   </div>
 </div></section>
@@ -336,10 +394,9 @@ footer .wrap{display:flex;gap:20px;flex-wrap:wrap;justify-content:space-between}
 <section id="headtracking"><div class="wrap">
   <div class="head center"><div class="eyebrow">New in 1.1</div><h2>Look around with your head.</h2>
     <p class="lead">Your AirPods become a head tracker: the camera of a game, a 3D cockpit or a 360° video follows where you look. No webcam, no IR hat, works in the dark.</p></div>
-  <img src="screenshots/app-motion.png" alt="The MousePods app: live head-tracking data from AirPods 3"
-       style="display:block;width:100%;max-width:960px;margin:0 auto 34px;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.25)">
-  <p style="text-align:center;margin:-14px 0 34px"><a class="btn primary" href="demo.html" style="display:inline-block;padding:12px 22px;border-radius:12px;background:#0a84ff;color:#fff;text-decoration:none;font-weight:600">Try the cockpit in your browser</a><br>
-    <small style="opacity:.7">Click and drag to look around. With MousePods running, your AirPods move the view.</small></p>
+  <img class="big-shot" src="screenshots/app-overview.png" alt="The MousePods app: live head position from AirPods 3">
+  <p class="try"><a class="btn p" href="demo.html">Try the cockpit in your browser</a><br>
+    <small>Click and drag to look around. With MousePods running, your AirPods move the view.</small></p>
   <div class="grid g2">
     <div class="card"><h3>Games, without opentrack<span class="new">NEW</span></h3>
       <p>Tick a Steam game running through Proton and its camera follows your head. Per-game profiles, curves and a full-screen calibration. Tested in Assetto Corsa and Euro Truck Simulator 2. opentrack and a virtual joystick are there too.</p></div>
@@ -465,9 +522,9 @@ const $=s=>document.querySelector(s);
 document.querySelectorAll(".copy").forEach(b=>b.onclick=()=>{const el=document.getElementById(b.dataset.copy).cloneNode(true);el.querySelector(".copy").remove();
   navigator.clipboard.writeText(el.innerText.split("\n").filter(l=>!l.startsWith("# ")).join("\n").trim()).then(()=>{b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1400)})});
 // ---------------- trame décomposée
-const FR=[["04 00 04 00","AACP header","#3a3a3c"],["17 00","opcode 0x17 · RTBuddy","#0a84ff"],["00 08 00 00","descriptor 0x800 · Sensor","#5e5ce6"],["0e 00","length 14","#3a3a3c"],
- ["00 06 00 00","version · gen · side","#8e8e93"],["07 05 06 00","sub-packet: dev 7 · len 10 · SetReport","#bf5af2"],["02","feature report","#ff375f"],["01","ID 1 · Report Interval","#ff9f0a"],["10 27 00 00","10 000 µs → 100 Hz","#30d158"]];
-$("#bytes").innerHTML=FR.map(([h,l,c])=>`<div class="byte"><div class="hx" style="background:${c}22;box-shadow:inset 0 0 0 1.5px ${c};color:#f5f5f7">${h.split(" ").map(x=>`<span>${x}</span>`).join("")}</div><div class="lb">${l}</div></div>`).join("");
+const FR=[["04 00 04 00","AACP header","#77767b"],["17 00","opcode 0x17 · RTBuddy","#f54f1b"],["00 08 00 00","descriptor 0x800 · Sensor","#62a0ea"],["0e 00","length 14","#77767b"],
+ ["00 06 00 00","version · gen · side","#9a9996"],["07 05 06 00","sub-packet: dev 7 · len 10 · SetReport","#c061cb"],["02","feature report","#ff7b63"],["01","ID 1 · Report Interval","#f6d32d"],["10 27 00 00","10 000 µs → 100 Hz","#57e389"]];
+$("#bytes").innerHTML=FR.map(([h,l,c])=>`<div class="byte"><div class="hx" style="background:${c}26;box-shadow:inset 0 0 0 1.5px ${c};color:#f2f2f3">${h.split(" ").map(x=>`<span>${x}</span>`).join("")}</div><div class="lb">${l}</div></div>`).join("");
 // ---------------- modèle 3D
 function box(w,h,d,x,y,z,r){const g=document.createElement("div");g.className="part";g.style.transform=`translate3d(${x}px,${y}px,${z}px)`;
   [[w,h,`translateZ(${d/2}px)`],[w,h,`rotateY(180deg) translateZ(${d/2}px)`],[d,h,`rotateY(90deg) translateZ(${w/2}px)`],[d,h,`rotateY(-90deg) translateZ(${w/2}px)`],[w,d,`rotateX(90deg) translateZ(${h/2}px)`],[w,d,`rotateX(-90deg) translateZ(${h/2}px)`]]
@@ -487,9 +544,9 @@ function tick(ts){if(!D)return;if(playing){if(!last)last=ts;const dt=(ts-last)/1
   pod.style.transform=`scale(1.3) matrix3d(${qmat(q).join(",")})`;$("#phase").textContent=PH[r[1]]||r[1];$("#time").textContent=r[0].toFixed(1)+" s";
   draw();requestAnimationFrame(tick)}
 function draw(){const W=cv.clientWidth,H=310,dpr=devicePixelRatio||1;if(cv.width!==W*dpr){cv.width=W*dpr;cv.height=H*dpr}cx.setTransform(dpr,0,0,dpr,0,0);cx.clearRect(0,0,W,H);
-  const a=Math.max(0,i-300),seg=D.slice(a,i+1),mx=250;cx.strokeStyle="#e8e8ed";cx.fillStyle="#86868b";cx.font="11px Inter,sans-serif";cx.lineWidth=1;
+  const a=Math.max(0,i-300),seg=D.slice(a,i+1),mx=250,css=getComputedStyle(cv),tk=n=>css.getPropertyValue(n).trim();cx.strokeStyle=tk("--plot-line");cx.fillStyle=tk("--text3");cx.font='11px "Adwaita Sans",Inter,sans-serif';cx.lineWidth=1;
   [-1,-.5,0,.5,1].forEach(f=>{const y=H/2-f*(H/2-12);cx.beginPath();cx.moveTo(36,y);cx.lineTo(W,y);cx.stroke();cx.fillText(Math.round(f*mx),0,y+4)});
-  ["#0a84ff","#30d158","#ff9f0a"].forEach((col,k)=>{cx.strokeStyle=col;cx.lineWidth=2;cx.lineJoin="round";cx.beginPath();
+  [tk("--gx"),tk("--gy"),tk("--gz")].forEach((col,k)=>{cx.strokeStyle=col;cx.lineWidth=2;cx.lineJoin="round";cx.beginPath();
     seg.forEach((r,j)=>{const x=36+j*(W-36)/300,v=r[5+k]*0.122,y=H/2-Math.max(-1,Math.min(1,v/mx))*(H/2-12);j?cx.lineTo(x,y):cx.moveTo(x,y)});cx.stroke()})}
 // ---------------- décodeur
 const EX={hc:"04 00 04 00 17 00 00 08 00 00 08 00 00 05 00 00 00 02 00 00",

@@ -3,9 +3,15 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MousePods – Flatpak repo</title>
-<style>body{font:16px/1.5 system-ui,sans-serif;max-width:42rem;margin:3rem auto;padding:0 1rem}
-h1{font-size:2.25rem;line-height:1.15;margin:0 0 .8rem}h2{font-size:1.4rem;margin:2rem 0 .5rem}
-code,pre{background:#f2f2f2;border-radius:6px;padding:.1em .4em}pre{padding:.8em;overflow:auto}</style>
+<meta name="color-scheme" content="light dark"><link rel="icon" href="brand/icon.svg">
+<style>/* same GNOME look and MousePods orange as the website and the app */
+:root{--bg:#fafafb;--card:#ffffff;--text:#1e1e20;--text2:#5e5c64;--line:rgba(0,0,0,.08);--accent:#f54f1b;--accent-text:#c0380e}
+@media (prefers-color-scheme: dark){:root{--bg:#222226;--card:#36363b;--text:#f2f2f3;--text2:#c0c0c6;--line:rgba(255,255,255,.08);--accent-text:#ff8f66}}
+body{font:16px/1.55 "Adwaita Sans","Inter","Cantarell",system-ui,sans-serif;max-width:42rem;margin:3rem auto;padding:0 1rem;background:var(--bg);color:var(--text)}
+a{color:var(--accent-text)}a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+h1{font-size:2.25rem;line-height:1.15;margin:0 0 .8rem;letter-spacing:-.02em}h2{font-size:1.4rem;margin:2rem 0 .5rem}
+code,pre{font-family:"Adwaita Mono","JetBrains Mono",ui-monospace,monospace;font-size:.9em;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:.1em .4em}
+pre{padding:.8em 1em;overflow:auto;border-radius:12px}</style>
 </head>
 <body>
 <h1>MousePods – Flatpak repo</h1>

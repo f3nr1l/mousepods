@@ -32,7 +32,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/app-motion.png" width="800" alt="The MousePods app: live motion data from AirPods 3">
+  <img src="docs/screenshots/app-overview.png" width="800" alt="The MousePods app: overview with the live head position of AirPods 3">
 </p>
 
 ---
@@ -116,12 +116,12 @@ Clicks: stem press, quick head tilt (optional), or dwell. Shortcuts: `Ctrl+Alt+C
 
 ## The app
 
-A local app in the style of macOS Settings (light and dark): battery rings, live 3D orientation, rate charts, every setting applied
-live, guided calibration, a **sensor explorer** to start and query each RemoteHID device, the AirPods' internal settings and a raw packet log.
+A local app in the GNOME style with MousePods orange, light and dark (the 1.1 look is one click away in Settings): live head
+position, battery rings, live 3D orientation, rate charts, every setting applied live, guided calibration, a **sensor explorer** to start and query each RemoteHID device, the AirPods' internal settings and a raw packet log.
 
 <p align="center">
-  <img src="docs/screenshots/app-sensors.png" width="49%" alt="Sensor explorer">
-  <img src="docs/screenshots/app-calib.png" width="49%" alt="Calibration">
+  <img src="docs/screenshots/app-overview-light.png" width="49%" alt="Overview, light">
+  <img src="docs/screenshots/app-settings.png" width="49%" alt="Settings: style, colors, language">
 </p>
 
 ## Install

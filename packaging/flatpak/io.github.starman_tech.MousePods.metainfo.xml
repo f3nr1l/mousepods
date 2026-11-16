@@ -35,6 +35,16 @@
   </screenshots>
   <!-- newest first; a release tag needs an entry with a description (release_notes.py check) -->
   <releases>
+    <release version="1.3.1" date="2026-11-16">
+      <description>
+        <p>Much lighter with the window open, and a nicer overview.</p>
+        <ul>
+          <li>The overview no longer redraws itself 30 times a second: far less CPU, GPU and battery use while the window is open, and smoother</li>
+          <li>Overview: round live plot, status, battery rings and quick tiles for mode, source and calibration</li>
+          <li>New website look, matching the app</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.3.0" date="2026-11-16">
       <description>
         <p>A new look and a new icon.</p>

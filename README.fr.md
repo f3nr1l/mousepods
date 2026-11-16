@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/app-motion.png" width="800" alt="L'application MousePods : mouvement en direct des AirPods 3">
+  <img src="docs/screenshots/app-overview.png" width="800" alt="L'application MousePods : accueil avec la position de la tête en direct">
 </p>
 
 ---
