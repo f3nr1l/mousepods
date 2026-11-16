@@ -8,6 +8,11 @@ named in `HKCU\Software\MousePods\PoseFile` (default `Z:\dev\shm\mousepods-headp
 Pose file: 64 bytes, little-endian — `u32 seq`, `u32 version (1)`, `f64 x, y, z` (cm),
 `f64 yaw, pitch, roll` (degrees, opentrack convention), `f64 t` (monotonic seconds).
 
+TrackIR "Enhanced" games (Star Citizen and others) ignore unencrypted data. Each one has an 8-byte
+table; the DLL reads it from `HKCU\Software\MousePods\Table\<TrackIR id>`. The bridge writes the
+table of every game in `native/trackir_games.csv` (opentrack's game list) when it installs, and
+removes the key when it uninstalls.
+
 Build: `native/build.sh` (downloads zig to `~/.cache/mousepods-build`, sha256-checked; output in `native/out/`). Debug log: set
 `HKCU\Software\MousePods\Debug` (DWORD) to 1 → `C:\mousepods\npclient.log`.
 
