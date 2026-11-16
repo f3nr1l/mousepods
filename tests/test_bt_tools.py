@@ -15,6 +15,13 @@ MISSING = FileNotFoundError(2, "No such file or directory", "bluetoothctl")
 
 
 class BtToolTests(unittest.TestCase):
+    def setUp(self):
+        # these tests are about the bluetoothctl path: on a desktop where BlueZ answers on D-Bus
+        # the controller would never call bluetoothctl, so keep D-Bus out of the way
+        p = mock.patch.object(m.bluez_dbus, "available", return_value=False)
+        p.start()
+        self.addCleanup(p.stop)
+
     def test_missing_bluetoothctl_raises(self):
         with mock.patch.object(m.subprocess, "run", side_effect=MISSING):
             with self.assertRaises(m.BluetoothToolMissing) as cm:

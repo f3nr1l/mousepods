@@ -9,6 +9,13 @@ import airpods_mouse_controller as m  # noqa: E402
 
 
 class TestMissingBluetoothctl(unittest.TestCase):
+    def setUp(self):
+        # these tests are about the bluetoothctl path: on a desktop where BlueZ answers on D-Bus
+        # the controller would never call bluetoothctl, so keep D-Bus out of the way
+        p = mock.patch.object(m.bluez_dbus, "available", return_value=False)
+        p.start()
+        self.addCleanup(p.stop)
+
     def test_auto_pick_reports_missing_bluetoothctl(self):
         with mock.patch.object(m.shutil, "which", return_value=None):
             with self.assertRaises(OSError) as cm:

@@ -50,7 +50,7 @@ DEFAULT_CONFIG_PATH = os.path.join(HERE, "config.json")
 CTRL_SOCK = os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "airpods-mouse.sock")
 WINDOWS = sys.platform == "win32"
 CTRL_UDP = ("127.0.0.1", 8736)     # Windows has no AF_UNIX datagram sockets: --send uses loopback UDP there
-log =logging.getLogger("airpods-mouse")
+log = logging.getLogger("airpods-mouse")
 
 # =========================================================================== configuration
 DEFAULTS = {
