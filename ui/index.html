@@ -1195,7 +1195,7 @@ function renderGarmin(d){const miss=!d.available;$("#gm-missing").style.display=
   $("#gm-msgs").innerHTML=ms.length?ms.map(x=>`<tr><td class="mono" style="white-space:nowrap">${new Date(x.t*1000).toLocaleTimeString()}</td><td>${esc(x.text)}</td></tr>`).join(""):'<tr><td class="empty">—</td></tr>';
   drawGarmin(a,c)}
 // ---------- boucles
-function refreshState(){fetch("/api/state").then(r=>r.json()).then(j=>{S=j;renderState();if(page==="gestures")fillGestures()}).catch(()=>{})}
+function refreshState(){fetch("/api/state"+(page==="gestures"?"?watch=gestures":"")).then(r=>r.json()).then(j=>{S=j;renderState();if(page==="gestures")fillGestures()}).catch(()=>{})}
 // The live stream only runs while the page can be seen: a hidden tab, or the app window closed
 // to the tray, closes it, and it opens again when the page is shown.
 let ES=null,reconnectTimer=null;
