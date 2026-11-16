@@ -968,9 +968,10 @@ function applyLook(skin,scheme){skin=skin==="classic"?"classic":"adwaita";scheme
 function lookFromConfig(cfg){if(Date.now()-LOOK.changedAt<4000)return;applyLook(cfg.ui_skin||"adwaita",cfg.ui_scheme||"system")}
 // ---------- new look: page title row (pause), overview hero, games, autostart
 function renderPagebar(tm){const b=$("#pb-pause");setText(b,tm.paused?t("js.resume"):t("v2.pause_mouse"));setClass(b,tm.paused?"btn":"btn p")}
-$("#pb-pause").onclick=()=>post("/api/cmd",{cmd:"toggle"});
+// explicit pause / resume (not "toggle"): two quick clicks can never end in the opposite state
+$("#pb-pause").onclick=()=>post("/api/cmd",{cmd:T.paused?"resume":"pause"});
 let hxOnUntil=0;
-$("#hx-on").onchange=e=>{hxOnUntil=Date.now()+1500;if(!!T.paused===e.target.checked)post("/api/cmd",{cmd:"toggle"})};
+$("#hx-on").onchange=e=>{hxOnUntil=Date.now()+1500;post("/api/cmd",{cmd:e.target.checked?"resume":"pause"})};
 const HX={x:0,y:0,trail:[],at:0};
 function fmtDeg(v){return (v>=0?"+":"−")+Math.abs(v).toFixed(1)+"°"}
 function renderHero(tm){

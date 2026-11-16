@@ -35,6 +35,19 @@
   </screenshots>
   <!-- newest first; a release tag needs an entry with a description (release_notes.py check) -->
   <releases>
+    <release version="1.3.0" date="2026-11-16">
+      <description>
+        <p>A new look and a new icon.</p>
+        <ul>
+          <li>New look in the GNOME style with MousePods orange, light and dark. The previous look stays available: Settings, Appearance, Classic</li>
+          <li>New overview: the live position of your head, battery, mouse controls, your games and quick links to the cockpit demo and the 360° player</li>
+          <li>Simpler sidebar: the main pages first, the rest under Advanced</li>
+          <li>Settings: appearance, language, start at login and notifications in one place</li>
+          <li>New app icon</li>
+          <li>Option buttons no longer flick back after a click, and pause and resume can no longer end in the opposite state</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.2.1" date="2026-11-16">
       <description>
         <p>The same app as 1.2.0, now on the stable Flatpak channel too (the 1.2.0 upload did not reach it).</p>
