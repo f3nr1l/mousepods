@@ -9,6 +9,7 @@
      Settings > Appearance switches them; only one of the two style sheets is enabled at a time. -->
 <style id="skin-classic">
 .adw-only{display:none!important}
+.classic-gap{margin-bottom:14px}
 nav{display:flex;flex-direction:column}
 .nav-sep,.nav-adv-toggle,.pagebar,.banner{display:none!important}
 .nav-adv{display:contents}
@@ -175,7 +176,7 @@ code{background:var(--card2);padding:1px 6px;border-radius:5px}
   --bg:#fafafb; --side:#ebebed; --card:#ffffff; --card2:#ebebed; --btn:#e3e3e6; --btn-h:#d8d8dc; --seg:#e3e3e6;
   --seg-on:#ffffff; --sw-off:#cfcfd4; --sel:#d8d8dc; --text:#1e1e20; --text2:#5e5c64; --line:rgba(0,0,0,.08);
   --sep:rgba(0,0,0,.07); --border:#dcdce0; --accent:#f54f1b; --accent-text:#c0380e; --on-accent:#1b0b05;
-  --accent-soft:rgba(245,79,27,.13); --green:#26a269; --orange:#c88800; --red:#c01c28; --purple:#9141ac;
+  --accent-soft:rgba(245,79,27,.13); --green:#1c7a4f; --orange:#9c6a00; --red:#c01c28; --purple:#9141ac;
   --teal:#1c71d8; --banner:#fbe1d6; --plot:#f2f2f4; --plot-line:#d4d4d9; --toast:#2e2e33; --toast-text:#ffffff;
   --shadow:none; --panel:var(--card);
 }
@@ -276,9 +277,10 @@ h2{font-size:14.5px;font-weight:700;color:var(--text);margin:28px 4px 10px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 /* toggle group */
 /* equal columns, one line, same weight when selected: picking an option never moves the others */
-.seg{display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;align-items:stretch;background:var(--seg);border-radius:9px;padding:3px;gap:3px;max-width:100%;vertical-align:middle}
+.seg{display:inline-grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);align-items:stretch;background:var(--seg);border-radius:9px;padding:3px;gap:3px;max-width:100%;vertical-align:middle}
 .seg button{border:0;background:transparent;color:var(--text);font:inherit;font-weight:500;min-height:32px;padding:0 14px;border-radius:7px;cursor:pointer;
-  white-space:nowrap;display:flex;align-items:center;justify-content:center;line-height:1.2;transition:background .12s}
+  display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;transition:background .12s}
+@media (max-width:1100px){.seg button{padding:4px 10px}}
 .seg button:hover{background:var(--line)}
 .seg button.on{background:var(--seg-on);box-shadow:0 1px 2px rgba(0,0,0,.14)}
 .lrow.stack .seg{display:grid;width:100%}
@@ -553,8 +555,8 @@ a.lrow:hover,button.lrow:hover{background:var(--line)}
 <!-- =============================== RÉGLAGES -->
 <section class="page" id="p-settings">
   <h1 data-i18n="settings.settings">Réglages</h1><div class="sub" data-i18n="settings.everything_applies_instantly">Tout s'applique instantanément.</div>
-  <h2 data-i18n="v2.appearance">Appearance</h2>
-  <div class="card">
+  <h2 class="adw-only" data-i18n="v2.appearance">Appearance</h2>
+  <div class="card classic-gap">
     <div class="kv"><span><span data-i18n="v2.style">Style</span><small class="hint" style="display:block;margin-top:2px" data-i18n="v2.style_hint">New: the GNOME look. Classic: the look of MousePods 1.0 and 1.1.</small></span><span><div class="seg" data-key="ui_skin">
       <button data-v="adwaita" data-i18n="v2.style_new">New</button><button data-v="classic" data-i18n="v2.style_classic">Classic</button></div></span></div>
     <div class="kv adw-only"><span data-i18n="v2.scheme">Colors</span><span><div class="seg" data-key="ui_scheme">
@@ -562,14 +564,14 @@ a.lrow:hover,button.lrow:hover{background:var(--line)}
     <div class="kv"><span data-i18n="settings.language">Langue</span><span><div class="seg" data-key="ui_lang">
     <button data-v="auto" data-i18n="lang.auto">Automatique</button><button data-v="en" data-i18n="lang.en">English</button><button data-v="de" data-i18n="lang.de">Deutsch</button><button data-v="fr" data-i18n="lang.fr">Français</button></div></span></div>
   </div>
-  <h2 data-i18n="v2.general">General</h2>
-  <div class="card">
+  <h2 class="adw-only" data-i18n="v2.general">General</h2>
+  <div class="card adw-only">
     <div class="set toggle"><label for="st-autostart" data-i18n-html="v2.autostart">Start MousePods at login<small>hidden, in the tray</small></label><label class="sw"><input type="checkbox" id="st-autostart"><span></span></label></div>
     <div class="set toggle"><label data-i18n="settings.notifications">Notifications</label><label class="sw"><input type="checkbox" data-k="notifications"><span></span></label></div>
     <div class="kv"><span data-i18n="v2.welcome_again">Welcome guide</span><span><button class="btn sm" data-go="welcome" data-i18n="v2.open">Open</button></span></div>
   </div>
-  <h2 data-i18n="settings.sensitivity">Sensibilité</h2>
-  <div class="card">
+  <h2 class="adw-only" data-i18n="settings.sensitivity">Sensibilité</h2>
+  <div class="card"><h3 class="classic-only" data-i18n="settings.sensitivity">Sensibilité</h3>
     <div class="set"><label data-i18n="settings.horizontal">Horizontale</label><input type="range" data-k="sensitivity_x" min="0.1" max="5" step="0.05"><output></output></div>
     <div class="set"><label data-i18n="settings.vertical">Verticale</label><input type="range" data-k="sensitivity_y" min="0.1" max="5" step="0.05"><output></output></div>
     <div class="set toggle"><label data-i18n="settings.invert_horizontal">Inverser l'horizontale</label><label class="sw"><input type="checkbox" data-k="invert_x"><span></span></label></div>
@@ -610,9 +612,10 @@ a.lrow:hover,button.lrow:hover{background:var(--line)}
   </div>
   <h2 data-i18n="settings.system">Système</h2>
   <div class="card">
+    <div class="set toggle classic-only"><label data-i18n="settings.notifications">Notifications</label><label class="sw"><input type="checkbox" data-k="notifications"><span></span></label></div>
     <div class="set"><label data-i18n-html="settings.gyroscope_s_per_unit_scale_calibration">Gyroscope<small>°/s par unité (étalonnage d'échelle)</small></label><input type="range" data-k="gyro_dps_per_lsb" min="0.03" max="0.5" step="0.001"><output></output></div>
   </div>
-  <div class="hint" style="margin:18px 4px 0"><span data-i18n="settings.head_tracking_for_simulators_opentrack_v">Suivi de tête pour simulateurs (OpenTrack, manette virtuelle) : page</span> <a onclick="go('sims')" style="cursor:pointer;color:var(--accent)" data-i18n="settings.simulators">Simulateurs</a>.</div>
+  <div class="hint" style="margin:18px 4px 0"><span data-i18n="settings.head_tracking_for_simulators_opentrack_v">Suivi de tête pour simulateurs (OpenTrack, manette virtuelle) : page</span> <a onclick="go('sims')" style="cursor:pointer;color:var(--accent-text,var(--accent))" data-i18n="settings.simulators">Simulateurs</a>.</div>
 </section>
 
 <!-- =============================== CALIBRATION -->
@@ -945,7 +948,7 @@ function applyI18n(root=document){
   root.querySelectorAll("[data-i18n-attr]").forEach(e=>e.dataset.i18nAttr.split(";").forEach(p=>{
     const [a,k]=p.split("=");if(a&&k)e.setAttribute(a.trim(),t(k.trim()))}))}
 async function loadI18n(){try{const j=await (await fetch("/api/i18n")).json();I18N=j.strings||{};
-  document.documentElement.lang=j.lang||"en";lbLastRes=null;applyI18n();
+  document.documentElement.lang=j.lang||"en";lbLastRes=null;applyI18n();setText($("#pb-title"),pageTitle(page));
   $$(".seg[data-key=ui_lang] button").forEach(b=>b.classList.toggle("on",b.dataset.v===(j.setting||"auto")))}catch(e){}}
 const post=(u,b)=>fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b||{})});
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),1600)}
@@ -953,7 +956,8 @@ const SRC=k=>({head:t("js.src.head"),case:t("js.src.case"),hand:t("js.src.hand")
 // ---------- look: "adwaita" (new, default) or "classic"; colors: system, light or dark (new look only)
 var LOOK={skin:document.documentElement.dataset.skin||"adwaita",scheme:document.documentElement.dataset.theme||"system",changedAt:0};
 function applyLook(skin,scheme){skin=skin==="classic"?"classic":"adwaita";scheme=["light","dark"].includes(scheme)?scheme:"system";
-  const r=document.documentElement,changed=skin!==LOOK.skin;LOOK.skin=skin;LOOK.scheme=scheme;LOOK.changedAt=Date.now();
+  if(LOOK.applied&&skin===LOOK.skin&&scheme===LOOK.scheme)return;LOOK.applied=true;
+  const r=document.documentElement,changed=skin!==LOOK.skin;LOOK.skin=skin;LOOK.scheme=scheme;
   r.dataset.skin=skin;if(scheme==="system")delete r.dataset.theme;else r.dataset.theme=scheme;
   $("#skin-classic").disabled=skin==="adwaita";$("#skin-adw").disabled=skin!=="adwaita";
   try{localStorage.setItem("mp_skin",skin);localStorage.setItem("mp_scheme",scheme)}catch(e){}
@@ -961,12 +965,12 @@ function applyLook(skin,scheme){skin=skin==="classic"?"classic":"adwaita";scheme
   $$(".seg[data-key=ui_scheme] button").forEach(b=>b.classList.toggle("on",b.dataset.v===scheme));
   if(changed){renderVersion();if(S&&S.config)renderState()}}
 // the server's config wins, except right after a change made here (its reply may still be on the way)
-function lookFromConfig(cfg){if(Date.now()-LOOK.changedAt<4000){applyLook(LOOK.skin,LOOK.scheme);return}
-  applyLook(cfg.ui_skin||"adwaita",cfg.ui_scheme||"system")}
+function lookFromConfig(cfg){if(Date.now()-LOOK.changedAt<4000)return;applyLook(cfg.ui_skin||"adwaita",cfg.ui_scheme||"system")}
 // ---------- new look: page title row (pause), overview hero, games, autostart
 function renderPagebar(tm){const b=$("#pb-pause");setText(b,tm.paused?t("js.resume"):t("v2.pause_mouse"));setClass(b,tm.paused?"btn":"btn p")}
 $("#pb-pause").onclick=()=>post("/api/cmd",{cmd:"toggle"});
-$("#hx-on").onchange=e=>{if(!!T.paused===e.target.checked)post("/api/cmd",{cmd:"toggle"})};
+let hxOnUntil=0;
+$("#hx-on").onchange=e=>{hxOnUntil=Date.now()+1500;if(!!T.paused===e.target.checked)post("/api/cmd",{cmd:"toggle"})};
 const HX={x:0,y:0,trail:[],at:0};
 function fmtDeg(v){return (v>=0?"+":"−")+Math.abs(v).toFixed(1)+"°"}
 function renderHero(tm){
@@ -989,7 +993,7 @@ function renderHero(tm){
   const bats=(tm.battery||[]).filter(b=>b.state!=="disconnected");
   setHtml($("#hx-bat"),bats.map(b=>{const lv=b.level,col=lv!=null&&lv<=20?"var(--red)":"var(--green)";
     return `<div><dt>${esc(b.part)}</dt><dd>${lv==null?"—":lv+"%"}${b.state==="charging"?` <small class="hint">${esc(b.state_label||"")}</small>`:""}</dd><div class="lvl" title="${esc(b.state_label||"")}"><i style="width:${lv||0}%;background:${col}"></i></div></div>`}).join(""));
-  const on=$("#hx-on");if(document.activeElement!==on)on.checked=!tm.paused;
+  if(Date.now()>hxOnUntil)$("#hx-on").checked=!tm.paused;
   setText($("#hx-mode-hint"),({souris:t("v2.mode_hint.souris"),pointeur:t("v2.mode_hint.pointeur"),glisse:t("v2.mode_hint.glisse")})[tm.mode]||"");
   setText($("#hx-src-hint"),`${t("js.ov.detected",{place:({ear:t("js.place.ear"),case:t("js.place.case"),out:t("js.place.out")})[tm.place]||"—"})} → ${t("js.source_src",{src:SRC(tm.source)})}`);
   setText($("#hx-scroll"),tm.scroll?t("v2.on"):t("v2.off"));
@@ -1012,7 +1016,8 @@ $("#banner-open").onclick=()=>{$("#banner").hidden=true;const d=$("#news-dlg");i
 $("#banner-close").onclick=()=>{$("#banner").hidden=true;const d=$("#news-dlg"),ver=d.dataset.version;if(!ver)return;
   delete d.dataset.version;if(VER)VER.whats_new=null;post("/api/version",{seen:ver})};
 // ---------- navigation
-function go(p){page=p;if(p==="games")setTimeout(showGames,0);$$("#nav a").forEach(x=>x.classList.toggle("on",x.dataset.p===p));
+let prevPage=null;
+function go(p){prevPage=page;page=p;if(p==="games")setTimeout(showGames,0);$$("#nav a").forEach(x=>x.classList.toggle("on",x.dataset.p===p));
   $$(".page").forEach(e=>e.classList.toggle("on",e.id==="p-"+p));if(location.hash!=="#"+p)history.replaceState(null,"","#"+p);refreshState();onPage(p)}
 $$("#nav a").forEach(a=>a.onclick=e=>{e.preventDefault();go(a.dataset.p)});
 $$("[data-go]").forEach(a=>a.onclick=e=>{e.preventDefault();go(a.dataset.go)});
@@ -1022,7 +1027,7 @@ function pageTitle(p){const n=$(`#nav a[data-p="${p}"] span[data-i18n]`)||$(`#na
 function setAdvanced(open){$("#nav").classList.toggle("adv-open",open);$("#nav-adv-toggle").setAttribute("aria-expanded",String(open))}
 $("#nav-adv-toggle").onclick=()=>setAdvanced(!$("#nav").classList.contains("adv-open"));
 function onPage(p){setText($("#pb-title"),pageTitle(p));if($(`#nav-adv a[data-p="${p}"]`))setAdvanced(true);
-  if(p==="overview")loadHeroGames();if(p==="settings")loadAutostart()}
+  if(p==="overview"&&LOOK.skin==="adwaita"){if(prevPage==="games")heroGamesAt=0;loadHeroGames()}if(p==="settings")loadAutostart()}
 window.addEventListener("load",()=>{const h=location.hash.slice(1);if(h&&document.getElementById("p-"+h))go(h)});
 // ---------- commandes
 $$("[data-cmd]").forEach(b=>b.onclick=()=>{post("/api/cmd",{cmd:b.dataset.cmd});toast(b.textContent)});
@@ -1030,7 +1035,7 @@ $("#ov-toggle").onclick=()=>post("/api/cmd",{cmd:"toggle"});
 function setCfg(obj,msg){post("/api/config",obj).then(()=>msg&&toast(msg))}
 $$(".seg[data-key]").forEach(seg=>seg.querySelectorAll("button").forEach(b=>b.onclick=()=>{
   if(seg.dataset.key==="ui_skin"||seg.dataset.key==="ui_scheme"){const k=seg.dataset.key;
-    applyLook(k==="ui_skin"?b.dataset.v:LOOK.skin,k==="ui_scheme"?b.dataset.v:LOOK.scheme);setCfg({[k]:b.dataset.v},t("js.toast.saved"));return}
+    LOOK.changedAt=Date.now();applyLook(k==="ui_skin"?b.dataset.v:LOOK.skin,k==="ui_scheme"?b.dataset.v:LOOK.scheme);setCfg({[k]:b.dataset.v},t("js.toast.saved"));return}
   if(seg.dataset.key==="ui_lang"){post("/api/config",{ui_lang:b.dataset.v}).then(()=>loadI18n()).then(()=>{refreshState();renderVersion();toast(t("js.toast.language"))});return}
   const key=seg.dataset.key;SEG_PENDING[key]={v:b.dataset.v,until:Date.now()+2500};
   setCfg({[key]:b.dataset.v},key==="mode"?t("js.toast.mode",{name:b.textContent}):t("js.toast.source",{name:b.textContent}));
@@ -1611,7 +1616,8 @@ function renderVersion(){const v=VER;if(!v||!v.version)return;
   $("#news-sub").textContent=v.channel?t("js.news.channel",{channel:v.channel==="test"?t("js.news.test"):t("js.news.stable")}):"";
   $("#news-list").innerHTML=(v.releases||[]).map(relHtml).join("")||`<div class="card empty">${t("js.news.none")}</div>`;
   const n=v.whats_new,dlg=$("#news-dlg");
-  if(!n||dlg.open)return;
+  if(!n){$("#banner").hidden=true;return}
+  if(dlg.open)return;
   dlg.innerHTML=`<h2 id="news-dlg-title">${esc(t("js.news.new_in",{version:n.version}))}</h2>${(n.paragraphs||[]).map(p=>`<p>${esc(p)}</p>`).join("")}
     ${(n.items||[]).length?`<ul>${n.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>`:""}
     <form method="dialog" class="row" style="margin-top:16px;justify-content:flex-end">
@@ -1620,10 +1626,10 @@ function renderVersion(){const v=VER;if(!v||!v.version)return;
   if(LOOK.skin==="adwaita"){setText($("#banner-text"),t("v2.banner.text",{version:n.version}));$("#banner").hidden=false}
   else dlg.showModal()}
 $("#news-dlg").addEventListener("close",()=>{const dlg=$("#news-dlg"),ver=dlg.dataset.version;if(!ver)return;
-  delete dlg.dataset.version;if(VER)VER.whats_new=null;post("/api/version",{seen:ver});if(dlg.returnValue==="all")go("news")});
+  delete dlg.dataset.version;$("#banner").hidden=true;if(VER)VER.whats_new=null;post("/api/version",{seen:ver});if(dlg.returnValue==="all")go("news")});
 function loadVersion(){return fetch("/api/version").then(r=>r.json()).then(v=>{VER=v;renderVersion()}).catch(()=>{})}
 $("#side-version").onclick=e=>{e.preventDefault();go("news")};
-loadI18n().finally(()=>{loadVersion();$("#lb-proto-desc").textContent=LB_DESC(lbProto);setInterval(refreshState,1000);refreshState();connect()});
+loadI18n().finally(()=>{onPage(page);loadVersion();$("#lb-proto-desc").textContent=LB_DESC(lbProto);setInterval(refreshState,1000);refreshState();connect()});
 </script>
 </body>
 </html>
