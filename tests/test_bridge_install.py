@@ -62,6 +62,21 @@ class BridgeInstallTests(unittest.TestCase):
             self.assertTrue(os.path.isfile(os.path.join(self.ac.prefix, "drive_c", "mousepods", n)))
         self.assertEqual(bi.status(self.ac), "on")
 
+    def test_install_writes_trackir_tables(self):
+        bi.install(self.ac, self.dlls, "/dev/shm/x", lambda appid: False, tables={3450: bytes.fromhex("344ecef4a2b4c63e")})
+        reg = self.read_reg()
+        self.assertIn("[Software\\\\MousePods\\\\Table]", reg)
+        self.assertIn('"3450"=hex:34,4e,ce,f4,a2,b4,c6,3e', reg)
+
+    def test_install_reads_opentrack_list_by_default(self):
+        self.install()
+        self.assertIn('"3450"=hex:34,4e,ce,f4,a2,b4,c6,3e', self.read_reg())
+
+    def test_uninstall_removes_trackir_tables(self):
+        self.install()
+        bi.uninstall(self.ac, lambda appid: False)
+        self.assertNotIn("MousePods\\\\Table", self.read_reg())
+
     def test_install_requires_prefix(self):
         with self.assertRaises(bi.BridgeError) as cm:
             self.install(self.games["227300"])

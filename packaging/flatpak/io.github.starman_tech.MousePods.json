@@ -42,6 +42,7 @@
         "if [ -f build-info.json ]; then cp build-info.json /app/share/mousepods/; fi",
         "install -d /app/share/mousepods/native",
         "cp native/out/*.dll /app/share/mousepods/native/",
+        "install -Dm644 native/trackir_games.csv -t /app/share/mousepods/native/",
         "install -Dm644 LICENSE NOTICE -t /app/share/licenses/io.github.starman_tech.MousePods/",
         "install -Dm755 packaging/flatpak/mousepods-app.sh /app/bin/mousepods-app",
         "install -Dm644 packaging/flatpak/io.github.starman_tech.MousePods.desktop -t /app/share/applications/",
