@@ -1295,7 +1295,8 @@ const ANON=location.search.includes("anon");if(ANON)document.documentElement.cla
 let wizardChecked=false;
 function checkWizard(){if(wizardChecked||!S.config)return;wizardChecked=true;
   // autostart pre-ticked only for the Flatpak app; a source checkout may lack PyGObject for the desktop shell
-  $("#wz-autostart-on").checked=!!S.flatpak;if(S.config.wizard_done===false)go("welcome")}
+  // the guide opens by itself only when no page was asked for (a link to #overview, #games... wins)
+  $("#wz-autostart-on").checked=!!S.flatpak;if(S.config.wizard_done===false&&(!location.hash||location.hash==="#welcome"))go("welcome")}
 function renderWizard(){if(page!=="welcome")return;const tm=T||{};
   $("#wz-status").textContent=tm.connected&&tm.live?t("js.status.live"):(tm.status||(S&&S.status)||"—")}
 $("#wz-reconnect").onclick=()=>{post("/api/reconnect");toast(t("js.toast.reconnecting"))};
