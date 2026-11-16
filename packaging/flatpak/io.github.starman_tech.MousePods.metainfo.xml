@@ -40,7 +40,8 @@
         <p>Much lighter with the window open, and a nicer overview.</p>
         <ul>
           <li>The overview no longer redraws itself 30 times a second: far less CPU, GPU and battery use while the window is open, and smoother</li>
-          <li>Overview: round live plot, status, battery rings and quick tiles for mode, source and calibration</li>
+          <li>New overview: live head plot, battery rings, a head mouse card, your games with their Steam covers, and picture cards for the cockpit demo, the 360° player and simulators</li>
+          <li>The welcome guide no longer takes over when a page is asked for</li>
           <li>New website look, matching the app</li>
         </ul>
       </description>
