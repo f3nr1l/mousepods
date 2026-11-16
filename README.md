@@ -205,6 +205,7 @@ with *Enable both*. Assetto Corsa follows the head in the cockpit camera.
 |---|---|---|---|
 | Assetto Corsa | Proton, Games page or opentrack | AirPods Pro 2 | @henningnorden |
 | Euro Truck Simulator 2 | Proton Experimental, Games page | AirPods Pro 2 | @henningnorden |
+| Star Citizen | Wine (RSI Launcher), bridge set up by hand, TrackIR "Enhanced" table | AirPods Pro 3 | @f3nr1l |
 
 Tried it in another game? [Tell us](https://github.com/starman-tech/mousepods/issues/new?template=game_report.yml), it goes in this table.
 

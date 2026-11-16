@@ -44,6 +44,7 @@
           <li>Simpler sidebar: the main pages first, the rest under Advanced</li>
           <li>Settings: appearance, language, start at login and notifications in one place</li>
           <li>New app icon</li>
+          <li>Star Citizen and the other TrackIR "Enhanced" games (DCS, Elite Dangerous, ArmA, IL-2...) get head tracking through the game bridge. Games already switched on need to be switched off and on once</li>
           <li>Option buttons no longer flick back after a click, and pause and resume can no longer end in the opposite state</li>
         </ul>
       </description>
