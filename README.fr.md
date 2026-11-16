@@ -90,6 +90,7 @@ Linux avec BlueZ, AirPods appairés, accès en écriture à `/dev/uinput` (accor
 |---|---|---|
 | AirPods 3 | ✅ vérifié sur le matériel | RemoteHID, jusqu'à ~210 Hz |
 | AirPods Pro 2 (Lightning et USB-C) | ✅ vérifié sur le matériel | SensorDataWX, ~100 Hz |
+| AirPods Pro 3 | ✅ vérifié sur le matériel (@f3nr1l) | SensorDataWX, ~100 Hz |
 | AirPods Pro (1re gén.), AirPods 4, AirPods Max | ❓ pas testé | ils ont les capteurs ; [dis-nous ce que ça donne](https://github.com/starman-tech/mousepods/issues/new?template=device_report.yml) |
 | AirPods 1 / 2 | ❌ | pas de capteurs de suivi de tête |
 | Sony WH/WF-1000XM5 et XM6, ULT Wear · Pixel Buds Pro / Pro 2 | ⚠️ expérimental | protocole HID standard d'Android, à tester : [docs/HEADSETS.md](docs/HEADSETS.md) |
@@ -193,6 +194,12 @@ J'ai tenu les AirPods, pris les décisions et vérifié chaque résultat sur le 
     <img alt="Star history of MousePods" src="https://api.star-history.com/svg?repos=starman-tech/mousepods&type=Date">
   </picture>
 </a>
+
+## Construit sur MousePods
+
+- [RustPods](https://github.com/windosx/rustpods) par windosx : un centre de contrôle AirPods pour Linux en Rust, qui reprend les découvertes RemoteHID et le moteur de la souris.
+
+Tu as construit quelque chose sur MousePods ? Ouvre une issue et on l'ajoute ici.
 
 ## Crédits
 

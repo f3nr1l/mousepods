@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-09",
+  "updated": "2026-11-16",
   "how_to_add": "Add a line after a device report (https://github.com/starman-tech/mousepods/issues/new?template=device_report.yml). The website reads this file.",
   "tested": [
     {
@@ -30,6 +30,46 @@
       "result": "ok",
       "details": "SensorDataWX · mouse",
       "by": "starman-tech",
+      "date": "2026-11"
+    },
+    {
+      "device": "AirPods Pro 3",
+      "model": "model id 2027",
+      "kind": "earbuds",
+      "system": "Fedora 45, GNOME, Wayland (from source)",
+      "result": "ok",
+      "details": "SensorDataWX, ~100 Hz · head calibration",
+      "by": "f3nr1l",
+      "date": "2026-11"
+    },
+    {
+      "device": "AirPods Pro 2",
+      "model": "0x2014",
+      "kind": "earbuds",
+      "system": "Windows 11 (experimental driver, test signing)",
+      "result": "partial",
+      "details": "sensor stream 100 Hz (up to ~198 Hz), --diag, no mouse yet (docs/WINDOWS.md)",
+      "by": "amukher-udm",
+      "date": "2026-11"
+    },
+    {
+      "device": "AirPods Pro",
+      "model": "A3047",
+      "kind": "earbuds",
+      "system": "Windows 11 VM (driver proof of concept)",
+      "result": "partial",
+      "details": "raw SensorDataWX stream, 83 packets/s",
+      "by": "henningnorden",
+      "date": "2026-11"
+    },
+    {
+      "device": "Sony WH-1000XM6",
+      "model": "054C:0F8A",
+      "kind": "headphones",
+      "system": "Bazzite and Windows 11",
+      "result": "fail",
+      "details": "detected, enable accepted, but no input reports (#16), same with sony-head-tracker on Windows",
+      "by": "henningnorden",
       "date": "2026-11"
     },
     {
@@ -65,9 +105,19 @@
       "notes": "SensorDataWX, ~100 Hz"
     },
     {
-      "family": "AirPods Pro (1st gen), AirPods 4, AirPods Pro 3, AirPods Max",
+      "family": "AirPods Pro 3",
+      "status": "supported",
+      "notes": "SensorDataWX, ~100 Hz (one report so far)"
+    },
+    {
+      "family": "AirPods Pro (1st gen), AirPods 4, AirPods Max",
       "status": "untested",
       "notes": "they have the sensors, reports welcome"
+    },
+    {
+      "family": "AirPods on Windows 11",
+      "status": "experimental",
+      "notes": "test-signed driver, sensor stream and --diag, no mouse yet (docs/WINDOWS.md)"
     },
     {
       "family": "AirPods 1 and 2",
@@ -77,7 +127,7 @@
     {
       "family": "Sony WH-1000XM5 / XM6, WF-1000XM5 / XM6, ULT Wear",
       "status": "experimental",
-      "notes": "Android head-tracker HID, needs testing (docs/HEADSETS.md)"
+      "notes": "Android head-tracker HID. WH-1000XM6: detected but no data yet (#16)"
     },
     {
       "family": "Google Pixel Buds Pro / Pro 2",

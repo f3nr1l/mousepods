@@ -5,7 +5,7 @@ the ones made for Android's spatial audio with head tracking.
 
 | Headset | Status |
 |---|---|
-| Sony WH-1000XM5, WH-1000XM6, WF-1000XM5, WF-1000XM6, ULT Wear | experimental, needs testing |
+| Sony WH-1000XM5, WH-1000XM6, WF-1000XM5, WF-1000XM6, ULT Wear | experimental, needs testing (WH-1000XM6: no data yet, see below) |
 | Google Pixel Buds Pro, Pixel Buds Pro 2 | experimental, needs testing |
 | Samsung Galaxy Buds Pro | planned (Samsung's own protocol) |
 | Older headsets without motion sensors (Sony WH-1000XM4 and before, most Marshall…) | not possible |
@@ -37,6 +37,17 @@ then reads input report 1: a rotation vector (3 × int16, ±π rad), the angular
 
 The protocol details and the axis mapping come from
 [SonyTrackerLinux](https://github.com/kdani3/SonyTrackerLinux) (MIT), tested on a WH-1000XM5.
+
+## No data from the headset?
+
+If the headset is found and enabled but nothing moves (`samples` stays at 0 in `GET /api/state`), the
+headset itself is not streaming. That's what happened with a WH-1000XM6
+([#16](https://github.com/starman-tech/mousepods/issues/16)), on Linux and also on Windows with
+[sony-head-tracker](https://github.com/NicholasSlattery/sony-head-tracker). Things to try:
+
+1. Update the headset with Sony's app (Sound Connect) on a phone.
+2. In that app, turn on spatial audio / head tracking, then pair the headset with the PC again.
+3. Report what you got in a device report, even if it still doesn't work: it helps.
 
 ## Help us test
 

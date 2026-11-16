@@ -175,6 +175,7 @@ with *Enable both*. Assetto Corsa follows the head in the cockpit camera.
 |---|---|---|
 | AirPods 3 | ✅ verified on hardware | RemoteHID, up to ~210 Hz |
 | AirPods Pro 2 (Lightning and USB-C) | ✅ verified on hardware | SensorDataWX, ~100 Hz |
+| AirPods Pro 3 | ✅ verified on hardware (@f3nr1l) | SensorDataWX, ~100 Hz |
 | AirPods Pro (1st gen), AirPods 4, AirPods Max | ❓ untested | they have the sensors; [report how it goes](https://github.com/starman-tech/mousepods/issues/new?template=device_report.yml) |
 | AirPods 1 / 2 | ❌ | no head-tracking sensors |
 | Sony WH/WF-1000XM5 and XM6, ULT Wear · Pixel Buds Pro / Pro 2 | ⚠️ experimental | Android's head-tracker HID, needs testing: [docs/HEADSETS.md](docs/HEADSETS.md) |
@@ -275,6 +276,12 @@ I held the AirPods, made the calls and checked every result on real hardware. Th
     <img alt="Star history of MousePods" src="https://api.star-history.com/svg?repos=starman-tech/mousepods&type=Date">
   </picture>
 </a>
+
+## Built on MousePods
+
+- [RustPods](https://github.com/windosx/rustpods) by windosx: a Linux AirPods control center in Rust, using the RemoteHID findings and the head mouse engine.
+
+Built something on top of MousePods? Open an issue and we'll add it here.
 
 ## Credits
 
