@@ -35,6 +35,11 @@
   </screenshots>
   <!-- newest first; a release tag needs an entry with a description (release_notes.py check) -->
   <releases>
+    <release version="1.2.1" date="2026-11-16">
+      <description>
+        <p>The same app as 1.2.0, now on the stable Flatpak channel too (the 1.2.0 upload did not reach it).</p>
+      </description>
+    </release>
     <release version="1.2.0" date="2026-11-16">
       <description>
         <p>Lighter on the CPU, more headsets, and a first step on Windows.</p>
