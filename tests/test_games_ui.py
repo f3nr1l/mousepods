@@ -26,7 +26,7 @@ def html():
 class GamesUiTests(unittest.TestCase):
     def test_games_page_and_nav(self):
         h = html()
-        self.assertRegex(h, r'<a data-p="games">')
+        self.assertRegex(h, r'<a href="#games" data-p="games">')
         self.assertRegex(h, r'<section class="page" id="p-games">\s*<h1 data-i18n="games\.title">')
         self.assertIn('id="games-list"', h)
 

@@ -56,6 +56,8 @@ log = logging.getLogger("airpods-mouse")
 DEFAULTS = {
     "device_address": "auto",
     "ui_lang": "auto",             # "auto" (system language) | "en" | "de" | "fr"
+    "ui_skin": "adwaita",          # look of the app: "adwaita" (GNOME style) | "classic" (MousePods 1.0/1.1)
+    "ui_scheme": "system",         # colors of the "adwaita" look: "system" | "light" | "dark"
     "wizard_done": False,          # first-run wizard in the web UI completed
     "mouse_paused": True,          # mouse control starts off; Pause/Resume is remembered
     "games": {},                   # Steam appid -> {"enabled": bool, "profile": {...}} (game bridge)

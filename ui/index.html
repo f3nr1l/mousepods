@@ -4,8 +4,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AirPods Mouse</title>
-<style>
+<title>MousePods</title>
+<!-- Two looks on the same page: "adwaita" (default, GNOME style) and "classic" (the original look).
+     Settings > Appearance switches them; only one of the two style sheets is enabled at a time. -->
+<style id="skin-classic">
+.adw-only{display:none!important}
+nav{display:flex;flex-direction:column}
+.nav-sep,.nav-adv-toggle,.pagebar,.banner{display:none!important}
+.nav-adv{display:contents}
+.col{flex:1;min-width:0;display:flex;flex-direction:column}
+.col>main{min-height:0}
+/* the original sidebar order */
+nav a[data-p=overview]{order:1}nav a[data-p=motion]{order:2}nav a[data-p=settings]{order:3}nav a[data-p=calib]{order:4}
+nav a[data-p=gestures]{order:5}nav a[data-p=labo]{order:6}nav a[data-p=sims]{order:7}nav a[data-p=games]{order:8}
+nav a[data-p=garmin]{order:9}nav a[data-p=sensors]{order:10}nav a[data-p=device]{order:11}nav a[data-p=log]{order:12}nav a[data-p=about]{order:13}
 :root{
   --bg:#f5f5f7; --panel:rgba(255,255,255,.72); --card:#ffffff; --card2:#f2f2f7; --text:#1d1d1f; --text2:#6e6e73;
   --line:rgba(0,0,0,.08); --accent:#0071e3; --green:#34c759; --orange:#ff9f0a; --red:#ff3b30; --purple:#af52de;
@@ -156,37 +168,322 @@ code{background:var(--card2);padding:1px 6px;border-radius:5px}
 .cue.go .t{color:var(--green)}.cue.rest .t{color:var(--text2)}
 .exp{color:var(--orange);font-weight:600}
 </style>
+<style id="skin-adw">
+/* GNOME (libadwaita) look, MousePods orange. Light and dark follow the system unless
+   Settings > Appearance picks one (data-theme on <html>). */
+:root{
+  --bg:#fafafb; --side:#ebebed; --card:#ffffff; --card2:#ebebed; --btn:#e3e3e6; --btn-h:#d8d8dc; --seg:#e3e3e6;
+  --seg-on:#ffffff; --sw-off:#cfcfd4; --sel:#d8d8dc; --text:#1e1e20; --text2:#5e5c64; --line:rgba(0,0,0,.08);
+  --sep:rgba(0,0,0,.07); --border:#dcdce0; --accent:#f54f1b; --accent-text:#c0380e; --on-accent:#1b0b05;
+  --accent-soft:rgba(245,79,27,.13); --green:#26a269; --orange:#c88800; --red:#c01c28; --purple:#9141ac;
+  --teal:#1c71d8; --banner:#fbe1d6; --plot:#f2f2f4; --plot-line:#d4d4d9; --toast:#2e2e33; --toast-text:#ffffff;
+  --shadow:none; --panel:var(--card);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme=light]){
+  --bg:#222226; --side:#2e2e33; --card:#36363b; --card2:#414147; --btn:#414147; --btn-h:#4a4a50; --seg:#28282c;
+  --seg-on:#55555c; --sw-off:#55555c; --sel:#414147; --text:#f2f2f3; --text2:#c0c0c6; --line:rgba(255,255,255,.08);
+  --sep:#2a2a2e; --border:#1b1b1e; --accent-text:#ff8f66; --green:#2ec27e; --orange:#e5a50a; --red:#ff7b63;
+  --purple:#dc8add; --teal:#62a0ea; --banner:#3a2016; --plot:#222226; --plot-line:#414147; --toast:#48484e;
+}}
+:root[data-theme=dark]{
+  --bg:#222226; --side:#2e2e33; --card:#36363b; --card2:#414147; --btn:#414147; --btn-h:#4a4a50; --seg:#28282c;
+  --seg-on:#55555c; --sw-off:#55555c; --sel:#414147; --text:#f2f2f3; --text2:#c0c0c6; --line:rgba(255,255,255,.08);
+  --sep:#2a2a2e; --border:#1b1b1e; --accent-text:#ff8f66; --green:#2ec27e; --orange:#e5a50a; --red:#ff7b63;
+  --purple:#dc8add; --teal:#62a0ea; --banner:#3a2016; --plot:#222226; --plot-line:#414147; --toast:#48484e;
+}
+.classic-only{display:none!important}
+[hidden]{display:none!important}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Adwaita Sans","Inter","Cantarell",system-ui,sans-serif;background:var(--bg);color:var(--text);
+  -webkit-font-smoothing:antialiased;font-size:14.5px;display:flex;overflow:hidden}
+.mono{font-family:"Adwaita Mono","JetBrains Mono","Source Code Pro",ui-monospace,monospace;font-size:12.5px}
+a{color:var(--accent-text)}
+/* ---------- sidebar */
+aside{width:250px;flex:none;background:var(--side);border-right:1px solid var(--border);display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;min-height:52px;padding:0 16px;border-bottom:1px solid var(--border)}
+.brand .logo{width:28px;height:28px;border-radius:8px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;flex:none}
+.brand .logo svg{width:16px;height:16px}
+.brand b{font-size:14.5px;font-weight:700;display:block}
+.brand small{color:var(--text2);font-size:12px}
+nav{display:flex;flex-direction:column;gap:2px;padding:8px;overflow-y:auto;min-height:0}
+nav a,.nav-adv-toggle{display:flex;align-items:center;gap:12px;min-height:40px;padding:0 12px;border-radius:8px;color:var(--text);
+  text-decoration:none;cursor:pointer;user-select:none;font:inherit;flex:none}
+nav a:hover,.nav-adv-toggle:hover{background:var(--line)}
+nav a.on{background:var(--sel);font-weight:600}
+nav a .ic{width:18px;height:18px;display:grid;place-items:center;flex:none;background:none!important;color:inherit}
+nav a .ic svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav-sep{height:1px;background:var(--border);margin:8px 4px;flex:none}
+.nav-adv-toggle{justify-content:space-between;width:100%;border:0;background:none;color:var(--text2);text-align:left}
+.nav-adv-toggle svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+nav.adv-open .nav-adv-toggle svg{transform:rotate(90deg)}
+.nav-adv{display:none;flex-direction:column;gap:2px}
+nav.adv-open .nav-adv{display:flex}
+.side-foot{margin-top:auto;padding:12px 16px;border-top:1px solid var(--border);color:var(--text2);font-size:12.5px;line-height:1.5}
+#side-status{color:var(--text);font-weight:600}
+#side-version{display:inline-block;margin-top:4px;color:var(--text2);font-size:11.5px;text-decoration:none}#side-version:hover{color:var(--accent-text);text-decoration:underline}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--text2);margin-right:7px;vertical-align:1px}
+.dot.ok{background:var(--green)}.dot.warn{background:var(--orange)}
+/* ---------- content column: page title row, banner, scrolling page */
+.col{flex:1;min-width:0;display:flex;flex-direction:column}
+.pagebar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:8px 32px;border-bottom:1px solid var(--border);flex:none}
+.pagebar .pb-title{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.pagebar .row{gap:8px}
+.banner{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px;min-height:46px;padding:6px 16px;background:var(--banner);flex:none}
+.banner[hidden]{display:none}
+main{flex:1;overflow-y:auto;padding:28px 32px 60px;min-height:0}
+.page{display:none;max-width:1000px;margin:0 auto}
+.page.on{display:block;animation:fade .2s ease}
+.shot .page{animation:none!important}
+@keyframes fade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+.page>h1{display:none}
+h1{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.sub{color:var(--text2);margin:0 4px 22px;line-height:1.45}
+h2{font-size:14.5px;font-weight:700;color:var(--text);margin:28px 4px 10px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1100px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}}
+/* ---------- boxed lists */
+.card{background:var(--card);border-radius:12px;padding:14px 16px;position:relative;box-shadow:none}
+.card h3{font-size:15px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card .hint,.hint{color:var(--text2);font-size:13px;line-height:1.45}
+.big{font-size:28px;font-weight:700;letter-spacing:-.02em}
+.kv{display:flex;justify-content:space-between;align-items:center;min-height:46px;padding:8px 0;border-bottom:1px solid var(--sep);gap:14px}
+.kv:last-child{border-bottom:0}.kv span:first-child{color:var(--text)}.kv span:last-child{text-align:right;color:var(--text2)}
+.set{display:grid;grid-template-columns:1fr 220px 64px;align-items:center;gap:14px;min-height:54px;padding:8px 0;border-bottom:1px solid var(--sep)}
+.set:last-child{border-bottom:0}
+.set label{font-weight:400}.set label small{display:block;color:var(--text2);font-size:12.5px;margin-top:2px}
+.set output{text-align:right;color:var(--text2);font-variant-numeric:tabular-nums}
+.set.toggle{grid-template-columns:1fr auto}
+@media (max-width:760px){.set{grid-template-columns:1fr}.set output{text-align:left}}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--btn);font-size:12.5px;font-weight:600}
+.pill.g{color:var(--green)}.pill.o{color:var(--orange)}.pill.r{color:var(--red)}.pill.b{color:var(--accent-text)}
+#p-welcome .card{margin-bottom:12px}#p-welcome .card .btn{margin-top:8px}.game{margin-bottom:12px}.game .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.game .name{font-weight:600;font-size:15px;flex:1}.game details{margin-top:10px}.game summary{cursor:pointer;color:var(--text2);font-size:13px}
+.game .axis{display:grid;grid-template-columns:70px repeat(6,minmax(0,1fr));gap:8px;align-items:center;margin-top:8px;font-size:12.5px}
+.game .axis input[type=range]{width:100%}.game .prev{font-family:"Adwaita Mono",ui-monospace,monospace;font-size:12px;color:var(--text2)}
+/* ---------- buttons */
+.btn{appearance:none;border:0;background:var(--btn);color:var(--text);font:inherit;font-weight:600;min-height:34px;padding:0 16px;
+  border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;transition:background .15s}
+.btn:hover{background:var(--btn-h)}.btn:active{filter:brightness(.95)}
+.btn.p{background:var(--accent);color:var(--on-accent)}.btn.p:hover{filter:brightness(1.06)}
+.btn.d{background:color-mix(in srgb,var(--red) 16%,var(--btn));color:var(--red)}
+.btn.sm{min-height:30px;padding:0 12px;font-size:13px;border-radius:7px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,nav a:focus-visible,.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+/* toggle group */
+.seg{display:inline-flex;background:var(--seg);border-radius:9px;padding:3px;gap:3px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;color:var(--text);font:inherit;font-weight:500;min-height:30px;padding:0 14px;border-radius:7px;cursor:pointer}
+.seg button:hover{background:var(--line)}
+.seg button.on{background:var(--seg-on);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+/* switch */
+.sw{position:relative;width:48px;height:26px;flex:none;display:inline-block}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw span{position:absolute;inset:0;background:var(--sw-off);border-radius:999px;transition:.2s;cursor:pointer}
+.sw span:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;
+  box-shadow:0 1px 2px rgba(0,0,0,.25);transition:.2s}
+.sw input:checked+span{background:var(--accent)}.sw input:checked+span:before{transform:translateX(22px)}
+.sw input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+/* sliders and fields */
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:var(--sw-off);outline:none;accent-color:var(--accent)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.35);cursor:pointer;border:0}
+input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid var(--accent);outline-offset:2px}
+select,input[type=text],input[type=number]{font:inherit;background:var(--btn);color:var(--text);border:0;border-radius:8px;min-height:34px;padding:0 10px}
+input[type=text]:focus,input[type=number]:focus,select:focus{outline:2px solid var(--accent);outline-offset:-2px}
+/* battery */
+.bat{display:flex;flex-direction:column;align-items:center;gap:8px}
+.ring{width:84px;height:84px}
+.ring circle{fill:none;stroke-width:8}.ring .bg{stroke:var(--card2)}.ring .fg{stroke:var(--green);stroke-linecap:round;
+  transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .6s}
+.bat b{font-size:15px}.bat small{color:var(--text2);font-size:12px}
+/* 3D earbud (Motion page) */
+.stage{height:300px;perspective:900px;display:grid;place-items:center;background:var(--plot);border-radius:10px}
+.pod{position:relative;width:1px;height:1px;transform-style:preserve-3d;transition:transform .03s linear}
+.pod .part{position:absolute;transform-style:preserve-3d}
+.face{position:absolute;background:linear-gradient(160deg,#ffffff,#d4d4d9);border:1px solid rgba(0,0,0,.08);backface-visibility:visible}
+.axisx,.axisy,.axisz{position:absolute;height:3px;width:120px;left:0;top:0;transform-origin:0 50%;border-radius:2px}
+.axisx{background:var(--red)}.axisy{background:var(--green);transform:rotateZ(-90deg)}.axisz{background:var(--teal);transform:rotateY(90deg)}
+canvas{width:100%;display:block}
+.legend{display:flex;gap:16px;color:var(--text2);font-size:12.5px;margin-top:8px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.screen{aspect-ratio:16/10;background:var(--plot);border-radius:10px;position:relative;overflow:hidden}
+.screen .c{position:absolute;width:14px;height:14px;margin:-7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 6px var(--accent-soft)}
+.screen .t{position:absolute;width:10px;height:10px;margin:-5px;border-radius:50%;border:2px solid var(--teal)}
+.vec{display:grid;grid-template-columns:auto 1fr auto;gap:8px 12px;align-items:center;font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--card2);border-radius:3px;position:relative;overflow:hidden}
+.bar i{position:absolute;top:0;bottom:0;left:50%;background:var(--accent);border-radius:3px}
+/* calibration */
+.calib-hero{text-align:center;padding:30px 20px}
+.calib-hero .instr{font-size:24px;font-weight:700;margin:16px 0 8px;letter-spacing:-.02em;min-height:64px}
+.steps{display:flex;gap:6px;justify-content:center;margin-top:16px}
+.steps i{width:28px;height:5px;border-radius:3px;background:var(--card2)}.steps i.done{background:var(--green)}.steps i.cur{background:var(--accent)}
+.pring{width:150px;height:150px;margin:0 auto}
+.pring circle{fill:none;stroke-width:10}.pring .bg{stroke:var(--card2)}.pring .fg{stroke:var(--accent);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .12s}
+/* tables */
+table{width:100%;border-collapse:collapse}
+th{text-align:left;color:var(--text2);font-weight:600;font-size:12.5px;padding:8px;border-bottom:1px solid var(--sep)}
+td{padding:9px 8px;border-bottom:1px solid var(--sep);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.log{max-height:520px;overflow:auto}
+.log td{white-space:nowrap}.log td.hx{white-space:normal;word-break:break-all}
+.tx{color:var(--accent-text)}.rx{color:var(--green)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--toast);color:var(--toast-text);
+  padding:10px 20px;border-radius:999px;box-shadow:0 4px 18px rgba(0,0,0,.3);opacity:0;transition:.25s;font-weight:600;pointer-events:none;z-index:60}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.empty{color:var(--text2);text-align:center;padding:24px}
+.disc li{margin:0 0 10px 18px;line-height:1.5}
+code{background:var(--btn);padding:1px 6px;border-radius:5px;font-family:"Adwaita Mono",ui-monospace,monospace;font-size:.92em}
+.news-rel{margin-bottom:14px}.news-rel h3{margin:0 0 4px}.news-rel ul,#news-dlg ul{margin:6px 0 0;padding-left:20px}
+#news-dlg{border:0;border-radius:14px;padding:22px 24px;max-width:min(560px,90vw);background:var(--card);color:var(--text);box-shadow:0 20px 60px rgba(0,0,0,.4);margin:auto}
+#news-dlg::backdrop{background:rgba(0,0,0,.45)}#news-dlg h2{margin:0 0 10px;font-size:19px}#news-dlg p{margin:0 0 6px}
+/* lab cues */
+.cue{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  background:color-mix(in srgb,var(--bg) 95%,transparent);text-align:center;padding:30px}
+.cue.on{display:flex}
+.cue .t{font-size:clamp(34px,7vw,84px);font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.cue .s{font-size:clamp(16px,2.2vw,26px);color:var(--text2);max-width:900px}
+.cue .cd{font-size:clamp(40px,8vw,96px);font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent-text)}
+.cue .pb{width:min(720px,80vw);height:10px;border-radius:5px;background:var(--card2);overflow:hidden}
+.cue .pb i{display:block;height:100%;background:var(--accent);width:0}
+.cue.go .t{color:var(--green)}.cue.rest .t{color:var(--text2)}
+.exp{color:var(--orange);font-weight:600}
+/* ---------- overview (new look only) */
+.hero{display:flex;flex-wrap:wrap;align-items:center;gap:26px;background:var(--side);border-radius:14px;padding:20px 24px}
+.hero svg.plot{flex:none;width:164px;height:164px}
+.hero .who{flex:1;min-width:220px;display:flex;flex-direction:column;gap:7px}
+.hero .who h1{font-size:26px}
+.hero .who .st{color:var(--text2)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:0 12px;border-radius:999px;background:var(--btn);font-size:13px}
+.chip b{font-variant-numeric:tabular-nums}
+.hero dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;min-width:240px}
+.hero dt{color:var(--text2);font-size:12.5px}.hero dd{font-size:20px;font-weight:700;margin:4px 0 6px}
+.lvl{height:5px;border-radius:3px;background:var(--sw-off);overflow:hidden}.lvl i{display:block;height:100%;border-radius:3px;background:var(--green)}
+.cols{display:flex;flex-wrap:wrap;gap:26px;align-items:flex-start;margin-top:26px}
+.cols>*{flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:26px}
+.group>h2{margin:0 4px 8px;display:flex;justify-content:space-between;align-items:baseline}
+.group>h2 a{font-size:13px;font-weight:500;text-decoration:none;cursor:pointer}
+.list{background:var(--card);border-radius:12px;overflow:hidden}
+.lrow{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:8px 16px;border-bottom:1px solid var(--sep);color:var(--text);text-decoration:none}
+.lrow:last-child{border-bottom:0}
+a.lrow,button.lrow{cursor:pointer;width:100%;border-left:0;border-right:0;border-top:0;background:none;font:inherit;text-align:left}
+a.lrow:hover,button.lrow:hover{background:var(--line)}
+.lrow .lt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.lrow .lt small{color:var(--text2);font-size:12.5px}
+.lrow.stack{flex-direction:column;align-items:stretch;gap:10px;padding:14px 16px}
+.lrow .end{display:flex;align-items:center;gap:12px;color:var(--text2);font-size:13px;flex:none}
+.lrow .end svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.lrow input[type=range]{max-width:220px}
+.ok-text{color:var(--green)}
+.lrow.set{display:grid;grid-template-columns:1fr minmax(120px,220px) 56px;min-height:56px;padding:8px 16px}
+</style>
+<script id="look-boot">
+// apply the saved look before the first paint (no flash); the server's config takes over once loaded
+(function(){let s="adwaita",c="system";try{s=localStorage.getItem("mp_skin")||s;c=localStorage.getItem("mp_scheme")||c}catch(e){}
+  const r=document.documentElement;r.dataset.skin=s;if(c==="light"||c==="dark")r.dataset.theme=c;
+  document.getElementById("skin-classic").disabled=s==="adwaita";document.getElementById("skin-adw").disabled=s!=="adwaita"})();
+</script>
 </head>
 <body>
 <aside>
   <div class="brand">
     <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 4a3 3 0 0 0-3 3v1a3 3 0 0 0 3 3h.5v8a1.5 1.5 0 0 0 3 0V7a3 3 0 0 0-3-3H7zM17 4a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3h-.5v8a1.5 1.5 0 0 1-3 0V7a3 3 0 0 1 3-3h.5z"/></svg></div>
-    <div><b data-i18n="side.airpods_mouse">AirPods Mouse</b><small id="side-model">—</small></div>
+    <div><b data-i18n="side.airpods_mouse">MousePods</b><small id="side-model">—</small></div>
   </div>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-overview" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor"/></symbol><symbol id="i-motion" viewBox="0 0 24 24"><path d="M3 12c3-6 6-6 9 0s6 6 9 0"/></symbol><symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol><symbol id="i-calib" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></symbol><symbol id="i-gestures" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10.5V4.5a1.5 1.5 0 0 1 3 0V11M14 10.5V6a1.5 1.5 0 0 1 3 0v8a7 7 0 0 1-7 7c-2.5 0-4-1.5-5.5-3.5L3 14.5a1.5 1.5 0 0 1 2.5-1.7L8 15"/></symbol><symbol id="i-labo" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3M7.5 15h9"/></symbol><symbol id="i-sims" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="13" r="2"/><path d="M3.5 10.5c5 1 12 1 17 0M12 15v6"/></symbol><symbol id="i-games" viewBox="0 0 24 24"><rect x="2.5" y="7" width="19" height="11" rx="5.5"/><path d="M8 10.5v4M6 12.5h4"/><circle cx="15.5" cy="11.5" r="1" fill="currentColor"/><circle cx="17.5" cy="13.5" r="1" fill="currentColor"/></symbol><symbol id="i-garmin" viewBox="0 0 24 24"><rect x="7" y="6" width="10" height="12" rx="3"/><path d="M9 6V3h6v3M9 18v3h6v-3M12 10v2l1.5 1"/></symbol><symbol id="i-sensors" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></symbol><symbol id="i-device" viewBox="0 0 24 24"><path d="M9 4a4 4 0 0 0-4 4v1a4 4 0 0 0 4 4v7M15 4a4 4 0 0 1 4 4v1a4 4 0 0 1-4 4v7"/></symbol><symbol id="i-log" viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h9"/></symbol><symbol id="i-about" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z"/></symbol></svg>
-<nav id="nav">
-    <a data-p="overview" class="on"><span class="ic" style="background:#0a84ff"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-overview"/></svg></span><span data-i18n="side.overview">Aperçu</span></a>
-    <a data-p="motion"><span class="ic" style="background:#30d158"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-motion"/></svg></span><span data-i18n="side.motion">Mouvement</span></a>
-    <a data-p="settings"><span class="ic" style="background:#8e8e93"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-settings"/></svg></span><span data-i18n="side.settings">Réglages</span></a>
-    <a data-p="calib"><span class="ic" style="background:#ff9f0a"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calib"/></svg></span><span data-i18n="side.calibration">Calibration</span></a>
-    <a data-p="gestures"><span class="ic" style="background:#ff375f"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-gestures"/></svg></span><span data-i18n="side.gestures">Gestes</span></a>
-    <a data-p="labo"><span class="ic" style="background:#64d2ff"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-labo"/></svg></span><span data-i18n="side.lab">Labo</span></a>
-    <a data-p="sims"><span class="ic" style="background:#ff9500"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sims"/></svg></span><span data-i18n="side.simulators">Simulateurs</span></a>
-    <a data-p="games"><span class="ic" style="background:#34c759"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-games"/></svg></span><span data-i18n="side.games">Games</span></a>
-    <a data-p="garmin"><span class="ic" style="background:#007aff"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-garmin"/></svg></span>Garmin</a>
-    <a data-p="sensors"><span class="ic" style="background:#af52de"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sensors"/></svg></span><span data-i18n="side.sensors">Capteurs</span></a>
-    <a data-p="device"><span class="ic" style="background:#ff375f"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-device"/></svg></span>AirPods</a>
-    <a data-p="log"><span class="ic" style="background:#5e5ce6"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-log"/></svg></span><span data-i18n="side.log">Journal</span></a>
-    <a data-p="about"><span class="ic" style="background:#30b0c7"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-about"/></svg></span><span data-i18n="side.findings">Découvertes</span></a>
+<nav id="nav" aria-label="Pages">
+    <a href="#overview" data-p="overview" class="on"><span class="ic" style="background:#0a84ff"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-overview"/></svg></span><span data-i18n="side.overview">Aperçu</span></a>
+    <a href="#games" data-p="games"><span class="ic" style="background:#34c759"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-games"/></svg></span><span data-i18n="side.games">Games</span></a>
+    <a href="#sims" data-p="sims"><span class="ic" style="background:#ff9500"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sims"/></svg></span><span data-i18n="side.simulators">Simulateurs</span></a>
+    <a href="#calib" data-p="calib"><span class="ic" style="background:#ff9f0a"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calib"/></svg></span><span data-i18n="side.calibration">Calibration</span></a>
+    <a href="#settings" data-p="settings"><span class="ic" style="background:#8e8e93"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-settings"/></svg></span><span data-i18n="side.settings">Réglages</span></a>
+    <div class="nav-sep" role="separator"></div>
+    <button type="button" class="nav-adv-toggle" id="nav-adv-toggle" aria-expanded="false" aria-controls="nav-adv"><span data-i18n="v2.nav.advanced">Advanced</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    <div class="nav-adv" id="nav-adv">
+      <a href="#motion" data-p="motion"><span class="ic" style="background:#30d158"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-motion"/></svg></span><span data-i18n="side.motion">Mouvement</span></a>
+      <a href="#gestures" data-p="gestures"><span class="ic" style="background:#ff375f"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-gestures"/></svg></span><span data-i18n="side.gestures">Gestes</span></a>
+      <a href="#labo" data-p="labo"><span class="ic" style="background:#64d2ff"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-labo"/></svg></span><span data-i18n="side.lab">Labo</span></a>
+      <a href="#sensors" data-p="sensors"><span class="ic" style="background:#af52de"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sensors"/></svg></span><span data-i18n="side.sensors">Capteurs</span></a>
+      <a href="#device" data-p="device"><span class="ic" style="background:#ff375f"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-device"/></svg></span>AirPods</a>
+      <a href="#garmin" data-p="garmin"><span class="ic" style="background:#007aff"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-garmin"/></svg></span>Garmin</a>
+      <a href="#log" data-p="log"><span class="ic" style="background:#5e5ce6"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-log"/></svg></span><span data-i18n="side.log">Journal</span></a>
+      <a href="#about" data-p="about"><span class="ic" style="background:#30b0c7"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-about"/></svg></span><span data-i18n="side.findings">Découvertes</span></a>
+    </div>
   </nav>
   <div class="side-foot"><div><span class="dot" id="side-dot"></span><span id="side-status">—</span></div>
     <div id="side-rate" class="mono" style="margin-top:4px"></div>
     <a href="#news" id="side-version" class="mono"></a></div>
 </aside>
 
+<div class="col">
+<div class="pagebar">
+  <div class="pb-title" id="pb-title" role="heading" aria-level="1"></div>
+  <div class="row"><button class="btn" data-cmd="recenter" data-i18n="overview.recenter">Recentrer</button><button class="btn p" id="pb-pause" data-i18n="v2.pause_mouse">Pause mouse</button></div>
+</div>
+<div class="banner" id="banner" role="status" hidden><span id="banner-text"></span><button class="btn sm" id="banner-open" data-i18n="v2.banner.whats_new">What's new</button><button class="btn sm" id="banner-close" data-i18n="v2.banner.dismiss">Dismiss</button></div>
 <main>
 <!-- =============================== APERÇU -->
 <section class="page on" id="p-overview">
+<div class="adw-only">
+  <section class="hero" aria-label="AirPods">
+    <svg class="plot" viewBox="0 0 164 164" role="img" aria-labelledby="hx-plot-l"><title id="hx-plot-l" data-i18n="v2.plot_title">Live head position</title>
+      <rect style="fill:var(--plot)" width="164" height="164" rx="12"/>
+      <circle style="stroke:var(--plot-line)" cx="82" cy="82" r="66" fill="none"/><circle style="stroke:var(--plot-line)" cx="82" cy="82" r="33" fill="none"/>
+      <path style="stroke:var(--plot-line)" d="M82 10v144M10 82h144"/>
+      <polyline style="stroke:var(--accent)" id="hx-trail" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".45" points=""/>
+      <circle style="stroke:var(--accent)" id="hx-halo" cx="82" cy="82" r="14" fill="none" stroke-opacity=".35"/>
+      <circle style="fill:var(--accent)" id="hx-dot" cx="82" cy="82" r="7"/>
+    </svg>
+    <div class="who">
+      <h1 id="hx-name">AirPods</h1>
+      <span class="st" id="hx-status" data-i18n="overview.connecting">Connexion…</span>
+      <div class="chips" id="hx-chips">
+        <span class="chip"><span data-i18n="v2.yaw">Yaw</span> <b id="hx-yaw">—</b></span>
+        <span class="chip"><span data-i18n="v2.pitch">Pitch</span> <b id="hx-pitch">—</b></span>
+        <span class="chip"><span data-i18n="v2.roll">Roll</span> <b id="hx-roll">—</b></span>
+      </div>
+      <span class="hint" id="hx-plot-hint" data-i18n="v2.plot_hint">The dot follows your head. Exact angles appear while a game or opentrack uses the head tracking.</span>
+    </div>
+    <dl id="hx-bat"></dl>
+  </section>
+  <div class="cols">
+    <div>
+      <section class="group" aria-labelledby="hx-mouse-h"><h2 id="hx-mouse-h" data-i18n="v2.mouse">Mouse</h2>
+        <div class="list">
+          <div class="lrow"><label class="lt" for="hx-on"><span data-i18n="v2.move_cursor">Move the cursor with my head</span><small data-i18n="v2.move_cursor_hint">Also from the tray icon or Ctrl+Alt+P</small></label>
+            <label class="sw"><input type="checkbox" id="hx-on"><span></span></label></div>
+          <div class="lrow stack"><span id="hx-mode-l" data-i18n="overview.mode">Mode</span>
+            <div class="seg" data-key="mode" role="group" aria-labelledby="hx-mode-l"><button data-v="souris" data-i18n="overview.mouse">Souris</button><button data-v="pointeur" data-i18n="overview.pointer">Pointeur</button><button data-v="glisse" data-i18n="overview.glide">Glisse</button></div>
+            <small class="hint" id="hx-mode-hint"></small></div>
+          <div class="lrow stack"><span id="hx-src-l" data-i18n="overview.source">Source</span>
+            <div class="seg" data-key="source" role="group" aria-labelledby="hx-src-l"><button data-v="auto" data-i18n="overview.auto">Auto</button><button data-v="head" data-i18n="overview.head">Tête</button><button data-v="case" data-i18n="overview.case">Boîtier</button><button data-v="hand" data-i18n="overview.in_hand">En main</button></div>
+            <small class="hint" id="hx-src-hint"></small></div>
+          <div class="lrow set"><label for="hx-speed" data-i18n-html="settings.speed_pixels_per_degree_of_rotation">Vitesse<small>pixels par degré de rotation</small></label><input type="range" id="hx-speed" data-k="souris.px_per_deg" min="2" max="80" step="0.5"><output></output></div>
+          <button type="button" class="lrow" data-cmd="scroll"><span class="lt"><span data-i18n="overview.scroll_mode">Mode défilement</span><small data-i18n="v2.scroll_hint">Turn your head to scroll, press again to stop</small></span><span class="end" id="hx-scroll">—</span></button>
+        </div></section>
+      <section class="group" aria-labelledby="hx-more-h"><h2 id="hx-more-h" data-i18n="v2.setup">Setup</h2>
+        <div class="list">
+          <a class="lrow" href="#calib" data-go="calib"><span class="lt"><span data-i18n="calib.calibration">Calibration</span><small id="hx-calib">—</small></span><span class="end"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a>
+          <a class="lrow" href="#gestures" data-go="gestures"><span class="lt"><span data-i18n="gestures.gestures">Gestes</span><small data-i18n="v2.gestures_hint">Head and jaw gestures</small></span><span class="end"><span id="hx-gest">—</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a>
+        </div></section>
+    </div>
+    <div>
+      <section class="group" aria-labelledby="hx-games-h"><h2 id="hx-games-h"><span data-i18n="games.title">Games</span><a href="#games" data-go="games" data-i18n="v2.manage_games">Manage games</a></h2>
+        <div class="list" id="hx-games"><div class="lrow"><span class="lt"><small data-i18n="games.loading">Looking for Steam games…</small></span></div></div></section>
+      <section class="group" aria-labelledby="hx-try-h"><h2 id="hx-try-h" data-i18n="v2.try_it">Try it</h2>
+        <div class="list">
+          <a class="lrow" href="/demo" target="_blank" rel="noopener"><span class="lt"><span data-i18n="v2.cockpit">Cockpit demo</span><small data-i18n="v2.cockpit_hint">Look around a 3D cockpit with your head</small></span><span class="end"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></a>
+          <a class="lrow" href="/vr" target="_blank" rel="noopener"><span class="lt"><span data-i18n="v2.player">360° player</span><small data-i18n="v2.player_hint">360° videos, YouTube and VR goggles</small></span><span class="end"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></a>
+          <a class="lrow" href="#sims" data-go="sims"><span class="lt"><span data-i18n="sims.simulators">Simulateurs</span><small data-i18n="v2.sims_hint">opentrack, virtual joystick, VR goggles</small></span><span class="end"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a>
+        </div></section>
+    </div>
+  </div>
+</div>
+<div class="classic-only">
   <h1 id="ov-name">AirPods</h1>
   <div class="sub" id="ov-sub" data-i18n="overview.connecting">Connexion…</div>
   <div class="grid g4" id="ov-bat"></div>
@@ -218,6 +515,7 @@ code{background:var(--card2);padding:1px 6px;border-radius:5px}
     <div class="card"><div class="hint" data-i18n="overview.protocol">Protocole</div><div style="font-size:17px;font-weight:650;margin-top:6px" id="ov-proto">—</div></div>
     <div class="card"><div class="hint" data-i18n="overview.axis_profile">Profil d'axes</div><div style="font-size:17px;font-weight:650;margin-top:6px" id="ov-prof">—</div></div>
   </div>
+</div>
 </section>
 
 <!-- =============================== MOUVEMENT -->
@@ -249,9 +547,23 @@ code{background:var(--card2);padding:1px 6px;border-radius:5px}
 <!-- =============================== RÉGLAGES -->
 <section class="page" id="p-settings">
   <h1 data-i18n="settings.settings">Réglages</h1><div class="sub" data-i18n="settings.everything_applies_instantly">Tout s'applique instantanément.</div>
-  <div class="card" style="margin-bottom:14px"><div class="kv"><span data-i18n="settings.language">Langue</span><span><div class="seg" data-key="ui_lang">
-    <button data-v="auto" data-i18n="lang.auto">Automatique</button><button data-v="en" data-i18n="lang.en">English</button><button data-v="de" data-i18n="lang.de">Deutsch</button><button data-v="fr" data-i18n="lang.fr">Français</button></div></span></div></div>
-  <div class="card"><h3 data-i18n="settings.sensitivity">Sensibilité</h3>
+  <h2 data-i18n="v2.appearance">Appearance</h2>
+  <div class="card">
+    <div class="kv"><span><span data-i18n="v2.style">Style</span><small class="hint" style="display:block;margin-top:2px" data-i18n="v2.style_hint">New: the GNOME look. Classic: the look of MousePods 1.0 and 1.1.</small></span><span><div class="seg" data-key="ui_skin">
+      <button data-v="adwaita" data-i18n="v2.style_new">New</button><button data-v="classic" data-i18n="v2.style_classic">Classic</button></div></span></div>
+    <div class="kv adw-only"><span data-i18n="v2.scheme">Colors</span><span><div class="seg" data-key="ui_scheme">
+      <button data-v="system" data-i18n="v2.scheme_system">System</button><button data-v="light" data-i18n="v2.scheme_light">Light</button><button data-v="dark" data-i18n="v2.scheme_dark">Dark</button></div></span></div>
+    <div class="kv"><span data-i18n="settings.language">Langue</span><span><div class="seg" data-key="ui_lang">
+    <button data-v="auto" data-i18n="lang.auto">Automatique</button><button data-v="en" data-i18n="lang.en">English</button><button data-v="de" data-i18n="lang.de">Deutsch</button><button data-v="fr" data-i18n="lang.fr">Français</button></div></span></div>
+  </div>
+  <h2 data-i18n="v2.general">General</h2>
+  <div class="card">
+    <div class="set toggle"><label for="st-autostart" data-i18n-html="v2.autostart">Start MousePods at login<small>hidden, in the tray</small></label><label class="sw"><input type="checkbox" id="st-autostart"><span></span></label></div>
+    <div class="set toggle"><label data-i18n="settings.notifications">Notifications</label><label class="sw"><input type="checkbox" data-k="notifications"><span></span></label></div>
+    <div class="kv"><span data-i18n="v2.welcome_again">Welcome guide</span><span><button class="btn sm" data-go="welcome" data-i18n="v2.open">Open</button></span></div>
+  </div>
+  <h2 data-i18n="settings.sensitivity">Sensibilité</h2>
+  <div class="card">
     <div class="set"><label data-i18n="settings.horizontal">Horizontale</label><input type="range" data-k="sensitivity_x" min="0.1" max="5" step="0.05"><output></output></div>
     <div class="set"><label data-i18n="settings.vertical">Verticale</label><input type="range" data-k="sensitivity_y" min="0.1" max="5" step="0.05"><output></output></div>
     <div class="set toggle"><label data-i18n="settings.invert_horizontal">Inverser l'horizontale</label><label class="sw"><input type="checkbox" data-k="invert_x"><span></span></label></div>
@@ -292,7 +604,6 @@ code{background:var(--card2);padding:1px 6px;border-radius:5px}
   </div>
   <h2 data-i18n="settings.system">Système</h2>
   <div class="card">
-    <div class="set toggle"><label data-i18n="settings.notifications">Notifications</label><label class="sw"><input type="checkbox" data-k="notifications"><span></span></label></div>
     <div class="set"><label data-i18n-html="settings.gyroscope_s_per_unit_scale_calibration">Gyroscope<small>°/s par unité (étalonnage d'échelle)</small></label><input type="range" data-k="gyro_dps_per_lsb" min="0.03" max="0.5" step="0.001"><output></output></div>
   </div>
   <div class="hint" style="margin:18px 4px 0"><span data-i18n="settings.head_tracking_for_simulators_opentrack_v">Suivi de tête pour simulateurs (OpenTrack, manette virtuelle) : page</span> <a onclick="go('sims')" style="cursor:pointer;color:var(--accent)" data-i18n="settings.simulators">Simulateurs</a>.</div>
@@ -612,7 +923,8 @@ code{background:var(--card2);padding:1px 6px;border-radius:5px}
   </ul></div>
 </section>
 </main>
-<div class="toast" id="toast"></div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -632,16 +944,87 @@ async function loadI18n(){try{const j=await (await fetch("/api/i18n")).json();I1
 const post=(u,b)=>fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b||{})});
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),1600)}
 const SRC=k=>({head:t("js.src.head"),case:t("js.src.case"),hand:t("js.src.hand"),auto:t("js.src.auto")})[k];
+// ---------- look: "adwaita" (new, default) or "classic"; colors: system, light or dark (new look only)
+var LOOK={skin:document.documentElement.dataset.skin||"adwaita",scheme:document.documentElement.dataset.theme||"system",changedAt:0};
+function applyLook(skin,scheme){skin=skin==="classic"?"classic":"adwaita";scheme=["light","dark"].includes(scheme)?scheme:"system";
+  const r=document.documentElement,changed=skin!==LOOK.skin;LOOK.skin=skin;LOOK.scheme=scheme;LOOK.changedAt=Date.now();
+  r.dataset.skin=skin;if(scheme==="system")delete r.dataset.theme;else r.dataset.theme=scheme;
+  $("#skin-classic").disabled=skin==="adwaita";$("#skin-adw").disabled=skin!=="adwaita";
+  try{localStorage.setItem("mp_skin",skin);localStorage.setItem("mp_scheme",scheme)}catch(e){}
+  $$(".seg[data-key=ui_skin] button").forEach(b=>b.classList.toggle("on",b.dataset.v===skin));
+  $$(".seg[data-key=ui_scheme] button").forEach(b=>b.classList.toggle("on",b.dataset.v===scheme));
+  if(changed){renderVersion();if(S&&S.config)renderState()}}
+// the server's config wins, except right after a change made here (its reply may still be on the way)
+function lookFromConfig(cfg){if(Date.now()-LOOK.changedAt<4000){applyLook(LOOK.skin,LOOK.scheme);return}
+  applyLook(cfg.ui_skin||"adwaita",cfg.ui_scheme||"system")}
+// ---------- new look: page title row (pause), overview hero, games, autostart
+function renderPagebar(tm){const b=$("#pb-pause");setText(b,tm.paused?t("js.resume"):t("v2.pause_mouse"));setClass(b,tm.paused?"btn":"btn p")}
+$("#pb-pause").onclick=()=>post("/api/cmd",{cmd:"toggle"});
+$("#hx-on").onchange=e=>{if(!!T.paused===e.target.checked)post("/api/cmd",{cmd:"toggle"})};
+const HX={x:0,y:0,trail:[],at:0};
+function fmtDeg(v){return (v>=0?"+":"−")+Math.abs(v).toFixed(1)+"°"}
+function renderHero(tm){
+  const now=performance.now(),dt=HX.at?Math.min((now-HX.at)/1000,0.2):0;HX.at=now;
+  const pose=Array.isArray(tm.pose)?tm.pose:null,R=66,clamp=v=>Math.max(-1,Math.min(1,v));
+  if(pose){HX.x=clamp(pose[0]/30);HX.y=clamp(pose[1]/30)}
+  else{const r=tm.rates||[0,0,0],k=Math.exp(-dt/0.5);   // no angles: the dot follows the head's turn and drifts back
+    HX.x=clamp(HX.x*k+(+r[0]||0)*dt/60);HX.y=clamp(HX.y*k+(+r[1]||0)*dt/60)}
+  const x=82+HX.x*R,y=82-HX.y*R;
+  HX.trail.push([x,y]);if(HX.trail.length>14)HX.trail.shift();
+  const dot=$("#hx-dot"),halo=$("#hx-halo");dot.setAttribute("cx",x.toFixed(1));dot.setAttribute("cy",y.toFixed(1));
+  halo.setAttribute("cx",x.toFixed(1));halo.setAttribute("cy",y.toFixed(1));
+  $("#hx-trail").setAttribute("points",HX.trail.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" "));
+  const live=tm.connected&&tm.live;dot.style.opacity=halo.style.opacity=live?"1":".35";
+  $("#hx-chips").hidden=!pose;$("#hx-plot-hint").hidden=!!pose||!live;
+  if(pose){setText($("#hx-yaw"),fmtDeg(pose[0]));setText($("#hx-pitch"),fmtDeg(pose[1]));setText($("#hx-roll"),fmtDeg(pose[2]))}
+  const parts=live?[t("v2.streaming"),tm.ear&&tm.ear.length?tm.ear.join(" · "):null,`${tm.rate} Hz`,tm.gaps?t("v2.gaps",{n:tm.gaps}):null]
+    :[tm.connected?t("v2.connected_idle"):(tm.status||t("js.ov.searching"))];
+  setText($("#hx-status"),parts.filter(Boolean).join(" · "));
+  const bats=(tm.battery||[]).filter(b=>b.state!=="disconnected");
+  setHtml($("#hx-bat"),bats.map(b=>{const lv=b.level,col=lv!=null&&lv<=20?"var(--red)":"var(--green)";
+    return `<div><dt>${esc(b.part)}</dt><dd>${lv==null?"—":lv+"%"}${b.state==="charging"?` <small class="hint">${esc(b.state_label||"")}</small>`:""}</dd><div class="lvl" title="${esc(b.state_label||"")}"><i style="width:${lv||0}%;background:${col}"></i></div></div>`}).join(""));
+  const on=$("#hx-on");if(document.activeElement!==on)on.checked=!tm.paused;
+  setText($("#hx-mode-hint"),({souris:t("v2.mode_hint.souris"),pointeur:t("v2.mode_hint.pointeur"),glisse:t("v2.mode_hint.glisse")})[tm.mode]||"");
+  setText($("#hx-src-hint"),`${t("js.ov.detected",{place:({ear:t("js.place.ear"),case:t("js.place.case"),out:t("js.place.out")})[tm.place]||"—"})} → ${t("js.source_src",{src:SRC(tm.source)})}`);
+  setText($("#hx-scroll"),tm.scroll?t("v2.on"):t("v2.off"));
+  const g=tm.gestures;setText($("#hx-gest"),g?(g.enabled?t("v2.on"):t("v2.off")):"—")}
+function renderHeroState(s){const name=(s.info||[]).find(i=>i.key==="info.name");
+  setText($("#hx-name"),ANON?(s.model||"AirPods"):(name?name.value:(s.model||"AirPods")));
+  setText($("#hx-calib"),s.profile_key?(s.calibrated?t("v2.calib_done",{profile:s.profile_key}):t("js.calib.todo")):"—")}
+let heroGamesAt=0;
+function loadHeroGames(){if(Date.now()-heroGamesAt<10000)return;heroGamesAt=Date.now();
+  fetch("/api/games").then(r=>r.json()).then(d=>{const on=(d.games||[]).filter(g=>g.enabled),box=$("#hx-games");
+    const chev='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+    box.innerHTML=on.length?on.map(g=>`<a class="lrow" href="#games" data-go="games"><span class="lt"><span>${esc(g.name||g.appid)}</span><small>${esc(t("v2.game_on"))}</small></span><span class="end"><span class="ok-text">${esc(t("v2.ready"))}</span>${chev}</span></a>`).join("")
+      :`<a class="lrow" href="#games" data-go="games"><span class="lt"><span>${esc(t(d.steam_found?"v2.no_game_on":"v2.no_steam"))}</span><small>${esc(t("v2.games_hint"))}</small></span><span class="end">${chev}</span></a>`;
+    box.querySelectorAll("[data-go]").forEach(a=>a.onclick=e=>{e.preventDefault();go(a.dataset.go)})}).catch(()=>{})}
+function loadAutostart(){fetch("/api/autostart").then(r=>r.json()).then(j=>{$("#st-autostart").checked=!!j.enabled}).catch(()=>{})}
+$("#st-autostart").onchange=e=>post("/api/autostart",{enabled:e.target.checked}).then(r=>r.json()).then(j=>{
+  if(j.error){toast(j.error);loadAutostart()}else toast(t("js.toast.saved"))}).catch(()=>loadAutostart());
+// what's new: a banner in the new look (the classic look keeps its dialog)
+$("#banner-open").onclick=()=>{$("#banner").hidden=true;const d=$("#news-dlg");if(d.dataset.version&&!d.open)d.showModal()};
+$("#banner-close").onclick=()=>{$("#banner").hidden=true;const d=$("#news-dlg"),ver=d.dataset.version;if(!ver)return;
+  delete d.dataset.version;if(VER)VER.whats_new=null;post("/api/version",{seen:ver})};
 // ---------- navigation
 function go(p){page=p;if(p==="games")setTimeout(showGames,0);$$("#nav a").forEach(x=>x.classList.toggle("on",x.dataset.p===p));
-  $$(".page").forEach(e=>e.classList.toggle("on",e.id==="p-"+p));if(location.hash!=="#"+p)history.replaceState(null,"","#"+p);refreshState()}
-$$("#nav a").forEach(a=>a.onclick=()=>go(a.dataset.p));
+  $$(".page").forEach(e=>e.classList.toggle("on",e.id==="p-"+p));if(location.hash!=="#"+p)history.replaceState(null,"","#"+p);refreshState();onPage(p)}
+$$("#nav a").forEach(a=>a.onclick=e=>{e.preventDefault();go(a.dataset.p)});
+$$("[data-go]").forEach(a=>a.onclick=e=>{e.preventDefault();go(a.dataset.go)});
+// new look: the page title row names the page, and a page of the Advanced group keeps that group open
+function pageTitle(p){const n=$(`#nav a[data-p="${p}"] span[data-i18n]`)||$(`#nav a[data-p="${p}"]`);
+  if(n&&n.textContent.trim())return n.textContent.trim();const h=$(`#p-${p} h1`);return h?h.textContent.trim():"MousePods"}
+function setAdvanced(open){$("#nav").classList.toggle("adv-open",open);$("#nav-adv-toggle").setAttribute("aria-expanded",String(open))}
+$("#nav-adv-toggle").onclick=()=>setAdvanced(!$("#nav").classList.contains("adv-open"));
+function onPage(p){setText($("#pb-title"),pageTitle(p));if($(`#nav-adv a[data-p="${p}"]`))setAdvanced(true);
+  if(p==="overview")loadHeroGames();if(p==="settings")loadAutostart()}
 window.addEventListener("load",()=>{const h=location.hash.slice(1);if(h&&document.getElementById("p-"+h))go(h)});
 // ---------- commandes
 $$("[data-cmd]").forEach(b=>b.onclick=()=>{post("/api/cmd",{cmd:b.dataset.cmd});toast(b.textContent)});
 $("#ov-toggle").onclick=()=>post("/api/cmd",{cmd:"toggle"});
 function setCfg(obj,msg){post("/api/config",obj).then(()=>msg&&toast(msg))}
 $$(".seg[data-key]").forEach(seg=>seg.querySelectorAll("button").forEach(b=>b.onclick=()=>{
+  if(seg.dataset.key==="ui_skin"||seg.dataset.key==="ui_scheme"){const k=seg.dataset.key;
+    applyLook(k==="ui_skin"?b.dataset.v:LOOK.skin,k==="ui_scheme"?b.dataset.v:LOOK.scheme);setCfg({[k]:b.dataset.v},t("js.toast.saved"));return}
   if(seg.dataset.key==="ui_lang"){post("/api/config",{ui_lang:b.dataset.v}).then(()=>loadI18n()).then(()=>{refreshState();renderVersion();toast(t("js.toast.language"))});return}
   setCfg({[seg.dataset.key]:b.dataset.v},seg.dataset.key==="mode"?t("js.toast.mode",{name:b.textContent}):t("js.toast.source",{name:b.textContent}));
   seg.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b))}));
@@ -649,7 +1032,7 @@ $$(".seg[data-key]").forEach(seg=>seg.querySelectorAll("button").forEach(b=>b.on
 function getK(cfg,k){return k.split(".").reduce((o,p)=>o&&o[p],cfg)}
 function mkObj(k,v){const p=k.split(".");return p.length===1?{[k]:v}:{[p[0]]:{[p[1]]:v}}}
 let editing=null;
-$$("#p-settings input[data-k], #p-sims input[data-k]").forEach(inp=>{
+$$("#p-settings input[data-k], #p-sims input[data-k], #p-overview input[data-k]").forEach(inp=>{
   const k=inp.dataset.k;
   const out=inp.parentElement.querySelector("output");
   if(inp.type==="range"){inp.oninput=()=>{editing=k;out.textContent=fmt(+inp.value,inp.step)};
@@ -657,7 +1040,7 @@ $$("#p-settings input[data-k], #p-sims input[data-k]").forEach(inp=>{
   else inp.onchange=()=>setCfg(mkObj(k,inp.checked),t("js.toast.saved"));
 });
 function fmt(v,step){const d=(step+"").includes(".")?(step+"").split(".")[1].length:0;return v.toFixed(Math.min(d,3))}
-function fillSettings(cfg){$$("#p-settings input[data-k], #p-sims input[data-k]").forEach(inp=>{const k=inp.dataset.k;if(k===editing)return;const v=getK(cfg,k);
+function fillSettings(cfg){lookFromConfig(cfg);$$("#p-settings input[data-k], #p-sims input[data-k], #p-overview input[data-k]").forEach(inp=>{const k=inp.dataset.k;if(k===editing)return;const v=getK(cfg,k);
   if(inp.type==="range"){if(v!==undefined){inp.value=v;inp.parentElement.querySelector("output").textContent=fmt(+v,inp.step)}}
   else inp.checked=!!v})}
 // ---------- calibration
@@ -706,6 +1089,7 @@ function setHtml(el,v){if(el&&el._html!==v){el._html=v;el.innerHTML=v}}
 let rateShownAt=0,ratePage=null;
 function renderTelemetry(){
   const tm=T;const ok=tm.connected&&tm.live;
+  if(LOOK.skin==="adwaita"){renderPagebar(tm);if(page==="overview")renderHero(tm)}
   setClass($("#side-dot"),"dot "+(ok?"ok":tm.connected?"warn":""));
   setText($("#side-status"),ok?t("js.status.live"):(tm.status||"—"));
   renderWizard();
@@ -830,7 +1214,7 @@ $("#wz-done").onclick=()=>post("/api/autostart",{enabled:$("#wz-autostart-on").c
   .then(()=>post("/api/wizard",{done:true})).then(()=>{toast(t("js.toast.wizard_done"));go("overview")});
 // features that need things the Flatpak does not ship (Garmin's AGPL dependency)
 function hideInFlatpak(){if(!S.flatpak)return;$$('#nav a[data-p="garmin"]').forEach(a=>a.style.display="none")}
-function renderState(){checkWizard();renderWizard();renderBaseline();hideInFlatpak();
+function renderState(){checkWizard();renderWizard();renderBaseline();hideInFlatpak();if(LOOK.skin==="adwaita")renderHeroState(S);
   const s=ANON?anonymize(S):S;
   $("#side-model").textContent=s.model||"—";
   const name=(s.info||[]).find(i=>i.key==="info.name");
@@ -1221,7 +1605,9 @@ function renderVersion(){const v=VER;if(!v||!v.version)return;
     ${(n.items||[]).length?`<ul>${n.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>`:""}
     <form method="dialog" class="row" style="margin-top:16px;justify-content:flex-end">
       <button class="btn sm" value="all">${t("js.news.all")}</button><button class="btn sm p" value="ok" autofocus>${t("js.news.got_it")}</button></form>`;
-  dlg.dataset.version=n.version;dlg.showModal()}
+  dlg.dataset.version=n.version;
+  if(LOOK.skin==="adwaita"){setText($("#banner-text"),t("v2.banner.text",{version:n.version}));$("#banner").hidden=false}
+  else dlg.showModal()}
 $("#news-dlg").addEventListener("close",()=>{const dlg=$("#news-dlg"),ver=dlg.dataset.version;if(!ver)return;
   delete dlg.dataset.version;if(VER)VER.whats_new=null;post("/api/version",{seen:ver});if(dlg.returnValue==="all")go("news")});
 function loadVersion(){return fetch("/api/version").then(r=>r.json()).then(v=>{VER=v;renderVersion()}).catch(()=>{})}

@@ -746,7 +746,18 @@ class WebUI:
             "battery": battery_view(self.dev.battery), "ear": ear_view(self.dev.ear),
             "gestures": self._gest_summary(),
             "speech": self.speech.as_dict() if self.speech else None,
+            "pose": self._pose(),
         }
+
+    def _pose(self):
+        """Head angles (yaw, pitch, roll in degrees) while the simulator outputs compute them (a game,
+        opentrack, the joystick, a calibration or the cockpit demo), else None: the overview then
+        shows the turn rates instead. Read only, so the stream never starts that work itself."""
+        ot = getattr(self.ctl, "opentrack", None)
+        pose = getattr(ot, "pose", None) if ot else None
+        if not pose or len(pose) < 6:
+            return None
+        return [round(float(v), 1) for v in pose[3:6]]
 
     def _gest_summary(self):
         g = getattr(self.ctl, "gestures", None)

@@ -37,7 +37,8 @@ BACKEND_VALUES = set()
 
 def script_source():
     html = read_ui()
-    return html[html.index("<script>") + 8:html.index("</script>")]
+    start = html.index("<script>") + 8          # the main script (the look boot script has an id)
+    return html[start:html.index("</script>", start)]
 
 
 def js_strings(js):
