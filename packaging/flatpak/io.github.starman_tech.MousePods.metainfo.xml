@@ -35,6 +35,19 @@
   </screenshots>
   <!-- newest first; a release tag needs an entry with a description (release_notes.py check) -->
   <releases>
+    <release version="1.2.0" date="2026-11-16">
+      <description>
+        <p>Lighter on the CPU, more headsets, and a first step on Windows.</p>
+        <ul>
+          <li>The app and the controller use much less CPU while idle (app window: from about half a core to 4 % on NVIDIA)</li>
+          <li>The first calibration no longer crashes at the end on a fresh install</li>
+          <li>Other headsets, experimental: Sony WH/WF-1000XM5 and XM6, ULT Wear and Pixel Buds Pro through Android's head-tracker protocol</li>
+          <li>AirPods Pro 3 verified on hardware</li>
+          <li>Windows, experimental and from source only: the AirPods sensor stream through a test-signed driver, no mouse yet</li>
+          <li>Battery: an unknown level shows a dash instead of 255 %</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.1.0" date="2026-11-09">
       <description>
         <p>Head tracking in games, a 3D cockpit, 360° videos and an app that updates itself.</p>
