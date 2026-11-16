@@ -26,6 +26,35 @@ def steam_roots():
     return sorted(roots, key=lambda r: r.flatpak)
 
 
+# Steam's cached library art, wide header first (old layout <appid>_<name>, new <appid>/<name>
+# or <appid>/<hash>/<name>). No logo/icon: transparent or tiny, not a cover.
+COVER_NAMES = ("header.jpg", "library_header.jpg", "library_hero.jpg", "library_600x900.jpg",
+               "header.png", "library_header.png", "library_hero.png", "library_600x900.png")
+
+
+def cover_path(appid, roots=None):
+    """The cached cover image of a game (real path inside a librarycache dir), or None. Read-only."""
+    appid = str(appid)
+    if not (0 < len(appid) <= 12 and appid.isascii() and appid.isdigit()):   # "²" is a digit too
+        return None
+    for root in steam_roots() if roots is None else roots:
+        cache = os.path.realpath(os.path.join(root.path, "appcache", "librarycache"))
+        if not os.path.isdir(cache):
+            continue
+        own = os.path.join(cache, appid)
+        dirs = [own]
+        try:
+            dirs += sorted(e.path for e in os.scandir(own) if e.is_dir())
+        except OSError:
+            pass
+        for name in COVER_NAMES:
+            for p in [os.path.join(cache, f"{appid}_{name}")] + [os.path.join(d, name) for d in dirs]:
+                real = os.path.realpath(p)
+                if os.path.commonpath([real, cache]) == cache and os.path.isfile(real):
+                    return real
+    return None
+
+
 def dll_dir():
     forced = os.environ.get("MOUSEPODS_DLL_DIR")
     if forced:
@@ -109,6 +138,7 @@ def list_payload(cfg_path):
                     "foreign_tracker": bridge_install.foreign_tracker(g),
                     "enabled": bool(entry.get("enabled")), "running": g.appid in running,
                     "launch_option_hint": "opentrack-launcher" in g.launch_options,
+                    "cover": cover_path(g.appid, roots) is not None,
                     "profile": effective_profile(normalize_profile(entry.get("profile")), baseline)})
     if adopted:
         from airpods_mouse_controller import update_config_file

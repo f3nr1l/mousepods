@@ -389,6 +389,39 @@ a.tile:hover{background:color-mix(in srgb,var(--card) 88%,var(--text))}
 .tile .tt b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:1000px){.hero{grid-template-columns:auto minmax(0,1fr)}.hero .bats{grid-column:1/-1}}
 @media (max-width:640px){.hero{grid-template-columns:1fr;justify-items:center;text-align:center}.hero .st{align-self:center}.tiles{grid-template-columns:1fr}}
+.feature{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
+.fcard{background:var(--card);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.fc-head{display:flex;align-items:center;gap:14px}
+.fc-head .lt{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.fc-head h2{margin:0;font-size:17px}.fc-head small{color:var(--text2);font-size:12.5px}
+.fc-head .ti{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;flex:none;background:var(--accent);color:var(--on-accent)}
+.fc-head .ti svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fcard>.seg{display:grid;width:100%}
+.covers{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.cover{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:460/215;display:grid;place-items:center;text-decoration:none;
+  color:var(--text);background:var(--btn)}
+.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cover img~.nm{opacity:0}
+.cover .nm{position:relative;font-weight:700;font-size:13px;padding:6px 10px;text-align:center}
+.cover .on{position:absolute;top:7px;right:7px;width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 2px var(--card)}
+.covers .none{display:flex;align-items:center;color:var(--text2);font-size:13px;line-height:1.4}
+.cover.add{background:none;border:2px dashed var(--sw-off);color:var(--accent-text)}
+.cover.add:hover{border-color:var(--accent);background:var(--accent-soft)}
+h2.sec{margin:26px 4px 10px}
+.tryrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.pic{position:relative;display:block;border-radius:16px;overflow:hidden;aspect-ratio:16/9;background:#1e1e22;color:#fff;text-decoration:none}
+.pic img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
+.pic:hover img{transform:scale(1.04)}
+.pic .cap{position:absolute;left:0;right:0;bottom:0;padding:28px 16px 14px;display:flex;flex-direction:column;gap:2px;
+  background:linear-gradient(to top,rgba(0,0,0,.78),rgba(0,0,0,0))}
+.pic .cap b{font-size:15px}.pic .cap small{color:rgba(255,255,255,.82);font-size:12.5px}
+.pic .ext{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45)}
+.pic .ext svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pic.sim{background:var(--accent);color:var(--on-accent)}
+.pic.sim .illu{position:absolute;left:50%;top:42%;width:54%;transform:translate(-50%,-50%);fill:none;stroke:var(--on-accent);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+.pic.sim .cap{background:none}.pic.sim .cap small{color:rgba(27,11,5,.78)}
+@media (max-width:900px){.feature{grid-template-columns:1fr}.tryrow{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.tryrow{grid-template-columns:1fr}}
 .cols{display:flex;flex-wrap:wrap;gap:26px;align-items:flex-start;margin-top:26px}
 .cols>*{flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:26px}
 .group>h2{margin:0 4px 8px;display:flex;justify-content:space-between;align-items:baseline}
@@ -482,37 +515,36 @@ a.lrow:hover,button.lrow:hover{background:var(--line)}
     <a class="tile" href="#settings" data-go="settings"><span class="ti"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4a4 4 0 0 0-4 4v1a4 4 0 0 0 4 4v7M15 4a4 4 0 0 1 4 4v1a4 4 0 0 1-4 4v7"/></svg></span><span class="tt"><small data-i18n="overview.source">Source</small><b id="hx-t-src">—</b></span></a>
     <a class="tile" href="#calib" data-go="calib"><span class="ti"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></span><span class="tt"><small data-i18n="calib.calibration">Calibration</small><b id="hx-t-cal">—</b></span></a>
   </div>
-  <div class="cols">
-    <div>
-      <section class="group" aria-labelledby="hx-mouse-h"><h2 id="hx-mouse-h" data-i18n="v2.mouse">Mouse</h2>
-        <div class="list">
-          <div class="lrow"><label class="lt" for="hx-on"><span data-i18n="v2.move_cursor">Move the cursor with my head</span><small data-i18n="v2.move_cursor_hint">Also from the tray icon or Ctrl+Alt+P</small></label>
-            <label class="sw"><input type="checkbox" id="hx-on"><span></span></label></div>
-          <div class="lrow stack"><span id="hx-mode-l" data-i18n="overview.mode">Mode</span>
-            <div class="seg" data-key="mode" role="group" aria-labelledby="hx-mode-l"><button data-v="souris" data-i18n="overview.mouse">Souris</button><button data-v="pointeur" data-i18n="overview.pointer">Pointeur</button><button data-v="glisse" data-i18n="overview.glide">Glisse</button></div>
-            <small class="hint" id="hx-mode-hint"></small></div>
-          <div class="lrow stack"><span id="hx-src-l" data-i18n="overview.source">Source</span>
-            <div class="seg" data-key="source" role="group" aria-labelledby="hx-src-l"><button data-v="auto" data-i18n="overview.auto">Auto</button><button data-v="head" data-i18n="overview.head">Tête</button><button data-v="case" data-i18n="overview.case">Boîtier</button><button data-v="hand" data-i18n="overview.in_hand">En main</button></div>
-            <small class="hint" id="hx-src-hint"></small></div>
-          <div class="lrow set"><label for="hx-speed" data-i18n-html="settings.speed_pixels_per_degree_of_rotation">Vitesse<small>pixels par degré de rotation</small></label><input type="range" id="hx-speed" data-k="souris.px_per_deg" min="2" max="80" step="0.5"><output></output></div>
-          <button type="button" class="lrow" data-cmd="scroll"><span class="lt"><span data-i18n="overview.scroll_mode">Mode défilement</span><small data-i18n="v2.scroll_hint">Turn your head to scroll, press again to stop</small></span><span class="end" id="hx-scroll">—</span></button>
-        </div></section>
-      <section class="group" aria-labelledby="hx-more-h"><h2 id="hx-more-h" data-i18n="v2.setup">Setup</h2>
-        <div class="list">
-          <a class="lrow" href="#calib" data-go="calib"><span class="lt"><span data-i18n="calib.calibration">Calibration</span><small id="hx-calib">—</small></span><span class="end"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a>
-          <a class="lrow" href="#gestures" data-go="gestures"><span class="lt"><span data-i18n="gestures.gestures">Gestes</span><small data-i18n="v2.gestures_hint">Head and jaw gestures</small></span><span class="end"><span id="hx-gest">—</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a>
-        </div></section>
-    </div>
-    <div>
-      <section class="group" aria-labelledby="hx-games-h"><h2 id="hx-games-h"><span data-i18n="games.title">Games</span><a href="#games" data-go="games" data-i18n="v2.manage_games">Manage games</a></h2>
-        <div class="list" id="hx-games"><div class="lrow"><span class="lt"><small data-i18n="games.loading">Looking for Steam games…</small></span></div></div></section>
-      <section class="group" aria-labelledby="hx-try-h"><h2 id="hx-try-h" data-i18n="v2.try_it">Try it</h2>
-        <div class="list">
-          <a class="lrow" href="/demo" target="_blank" rel="noopener"><span class="lt"><span data-i18n="v2.cockpit">Cockpit demo</span><small data-i18n="v2.cockpit_hint">Look around a 3D cockpit with your head</small></span><span class="end"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></a>
-          <a class="lrow" href="/vr" target="_blank" rel="noopener"><span class="lt"><span data-i18n="v2.player">360° player</span><small data-i18n="v2.player_hint">360° videos, YouTube and VR goggles</small></span><span class="end"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></a>
-          <a class="lrow" href="#sims" data-go="sims"><span class="lt"><span data-i18n="sims.simulators">Simulateurs</span><small data-i18n="v2.sims_hint">opentrack, virtual joystick, VR goggles</small></span><span class="end"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a>
-        </div></section>
-    </div>
+  <div class="feature">
+    <section class="fcard" aria-labelledby="hx-mouse-h">
+      <div class="fc-head"><span class="ti"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 8-6 1.5L10 19z"/></svg></span>
+        <label class="lt" for="hx-on"><h2 id="hx-mouse-h" data-i18n="v2.head_mouse">Head mouse</h2><small data-i18n="v2.move_cursor_hint">Also from the tray icon or Ctrl+Alt+P</small></label>
+        <label class="sw"><input type="checkbox" id="hx-on" aria-label="Head mouse"><span></span></label></div>
+      <div class="seg" data-key="mode" role="group" aria-label="Mode"><button data-v="souris" data-i18n="overview.mouse">Souris</button><button data-v="pointeur" data-i18n="overview.pointer">Pointeur</button><button data-v="glisse" data-i18n="overview.glide">Glisse</button></div>
+      <small class="hint" id="hx-mode-hint"></small>
+    </section>
+    <section class="fcard" aria-labelledby="hx-games-h">
+      <div class="fc-head"><span class="ti"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><path d="M17.3 5H6.7a4 4 0 0 0-4 3.6L2 15a3 3 0 0 0 5.3 2l1.2-1.5h7l1.2 1.5A3 3 0 0 0 22 15l-.7-6.4A4 4 0 0 0 17.3 5z"/></svg></span>
+        <span class="lt"><h2 id="hx-games-h" data-i18n="games.title">Games</h2><small id="hx-games-sub" data-i18n="v2.games_hint">Tick a Steam game and its camera follows your head</small></span>
+        <a class="btn sm" href="#games" data-go="games" data-i18n="v2.manage_games">Manage games</a></div>
+      <div class="covers" id="hx-games"></div>
+    </section>
+  </div>
+  <h2 class="sec" data-i18n="v2.try_it">Try it</h2>
+  <div class="tryrow">
+    <a class="pic" href="/demo" target="_blank" rel="noopener"><img src="/media/cockpit.jpg" alt="" loading="lazy"><span class="cap"><b data-i18n="v2.cockpit">Cockpit demo</b><small data-i18n="v2.cockpit_hint">Look around a 3D cockpit with your head</small></span><span class="ext"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></a>
+    <a class="pic" href="/vr" target="_blank" rel="noopener"><img src="/media/vr.jpg" alt="" loading="lazy"><span class="cap"><b data-i18n="v2.player">360° player</b><small data-i18n="v2.player_hint">360° videos, YouTube and VR goggles</small></span><span class="ext"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></a>
+    <a class="pic sim" href="#sims" data-go="sims"><svg class="illu" viewBox="0 0 120 80" aria-hidden="true"><circle cx="60" cy="40" r="26"/><circle cx="60" cy="40" r="7"/><path d="M34 40h19M67 40h19M60 47v19"/><path d="M14 64c10-8 22-12 46-12s36 4 46 12"/></svg><span class="cap"><b data-i18n="sims.simulators">Simulateurs</b><small data-i18n="v2.sims_hint">opentrack, virtual joystick, VR goggles</small></span></a>
+  </div>
+  <h2 class="sec" data-i18n="v2.more_controls">More controls</h2>
+  <div class="list">
+    <div class="lrow stack"><span id="hx-src-l" data-i18n="overview.source">Source</span>
+      <div class="seg" data-key="source" role="group" aria-labelledby="hx-src-l"><button data-v="auto" data-i18n="overview.auto">Auto</button><button data-v="head" data-i18n="overview.head">Tête</button><button data-v="case" data-i18n="overview.case">Boîtier</button><button data-v="hand" data-i18n="overview.in_hand">En main</button></div>
+      <small class="hint" id="hx-src-hint"></small></div>
+    <div class="lrow set"><label for="hx-speed" data-i18n-html="settings.speed_pixels_per_degree_of_rotation">Vitesse<small>pixels par degré de rotation</small></label><input type="range" id="hx-speed" data-k="souris.px_per_deg" min="2" max="80" step="0.5"><output></output></div>
+    <button type="button" class="lrow" data-cmd="scroll"><span class="lt"><span data-i18n="overview.scroll_mode">Mode défilement</span><small data-i18n="v2.scroll_hint">Turn your head to scroll, press again to stop</small></span><span class="end" id="hx-scroll">—</span></button>
+    <a class="lrow" href="#calib" data-go="calib"><span class="lt"><span data-i18n="calib.calibration">Calibration</span><small id="hx-calib">—</small></span><span class="end"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a>
+    <a class="lrow" href="#gestures" data-go="gestures"><span class="lt"><span data-i18n="gestures.gestures">Gestes</span><small data-i18n="v2.gestures_hint">Head and jaw gestures</small></span><span class="end"><span id="hx-gest">—</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a>
   </div>
 </div>
 <div class="classic-only">
@@ -1043,9 +1075,11 @@ function renderHeroState(s){const name=(s.info||[]).find(i=>i.key==="info.name")
 let heroGamesAt=0;
 function loadHeroGames(){if(Date.now()-heroGamesAt<10000)return;heroGamesAt=Date.now();
   fetch("/api/games").then(r=>r.json()).then(d=>{const on=(d.games||[]).filter(g=>g.enabled),box=$("#hx-games");
-    const chev='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
-    box.innerHTML=on.length?on.map(g=>`<a class="lrow" href="#games" data-go="games"><span class="lt"><span>${esc(g.name||g.appid)}</span><small>${esc(t("v2.game_on"))}</small></span><span class="end"><span class="ok-text">${esc(t("v2.ready"))}</span>${chev}</span></a>`).join("")
-      :`<a class="lrow" href="#games" data-go="games"><span class="lt"><span>${esc(t(d.steam_found?"v2.no_game_on":"v2.no_steam"))}</span><small>${esc(t("v2.games_hint"))}</small></span><span class="end">${chev}</span></a>`;
+    setText($("#hx-games-sub"),on.length?t("v2.games_on",{n:on.length}):t(d.steam_found?"v2.no_game_on":"v2.no_steam"));
+    box.innerHTML=on.length?on.map(g=>`<a class="cover" href="#games" data-go="games" title="${esc(g.name||g.appid)}">`+
+        (g.cover?`<img src="/api/games/${encodeURIComponent(g.appid)}/cover" alt="" loading="lazy" onerror="this.remove()">`:"")+
+        `<span class="nm">${esc(g.name||g.appid)}</span><span class="on" aria-label="${esc(t("v2.game_on"))}"></span></a>`).join("")
+      :`<a class="cover add" href="#games" data-go="games"><span class="nm">+ ${esc(t("v2.add_game"))}</span></a><div class="none">${esc(t("v2.games_hint"))}</div>`;
     box.querySelectorAll("[data-go]").forEach(a=>a.onclick=e=>{e.preventDefault();go(a.dataset.go)})}).catch(()=>{})}
 function loadAutostart(){fetch("/api/autostart").then(r=>r.json()).then(j=>{$("#st-autostart").checked=!!j.enabled}).catch(()=>{})}
 $("#st-autostart").onchange=e=>post("/api/autostart",{enabled:e.target.checked}).then(r=>r.json()).then(j=>{

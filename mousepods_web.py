@@ -63,6 +63,8 @@ SITE_PATHS = ("/api/pose", "/api/i18n", "/api/cmd")
 VR_FILE = os.path.join(HERE, "ui", "vr.html")                 # /vr : vidéos 360° / VR, la vue suit la tête
 VENDOR = {"three.module.min.js": "text/javascript", "Sky.js": "text/javascript",
           "LICENSE-three.txt": "text/plain; charset=utf-8"}   # ui/vendor, liste fermée
+MEDIA = {"cockpit.jpg": "image/jpeg", "vr.jpg": "image/jpeg"}  # ui/media, closed list (overview pictures)
+COVER_PATH = re.compile(r"/api/games/([0-9]{1,12})/cover")      # cached Steam library art of a game
 
 MODELS = ["2013", "2014", "200e", "200f", "2002", "200a", "2019", "201b", "2024", "2027", "202d"]  # -> model.<pid>
 INFO_LABEL_KEYS = ["info.name", "info.model", "info.manufacturer", "info.serial", "info.firmware", "info.firmware2",
@@ -829,6 +831,17 @@ class WebUI:
                 self.end_headers()
                 self.wfile.write(data)
 
+            def _file(self, path, ctype):
+                """A static file, cached for a day (vendor scripts, pictures)."""
+                with open(path, "rb") as f:
+                    data = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", ctype)
+                self.send_header("Cache-Control", "max-age=86400")
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
             def _site_origin(self):
                 origin = self.headers.get("Origin")
                 return origin if origin in SITE_ORIGINS and self.path.split("?")[0] in SITE_PATHS else None
@@ -864,14 +877,19 @@ class WebUI:
                 qs = parse_qs(self.path.split("?", 1)[1].split("#")[0]) if "?" in self.path else {}
                 self.path = self.path.split("?")[0].split("#")[0]
                 if self.path.startswith("/vendor/") and self.path[8:] in VENDOR:
-                    with open(os.path.join(HERE, "ui", "vendor", self.path[8:]), "rb") as f:
-                        data = f.read()
-                    self.send_response(200)
-                    self.send_header("Content-Type", VENDOR[self.path[8:]])
-                    self.send_header("Cache-Control", "max-age=86400")
-                    self.send_header("Content-Length", str(len(data)))
-                    self.end_headers()
-                    self.wfile.write(data)
+                    self._file(os.path.join(HERE, "ui", "vendor", self.path[8:]), VENDOR[self.path[8:]])
+                elif self.path.startswith("/media/") and self.path[7:] in MEDIA:
+                    self._file(os.path.join(HERE, "ui", "media", self.path[7:]), MEDIA[self.path[7:]])
+                elif COVER_PATH.fullmatch(self.path):          # read-only, path checked by cover_path
+                    import games_service
+                    path = games_service.cover_path(COVER_PATH.fullmatch(self.path).group(1))
+                    if path is None:
+                        return self._json({"error": tr("srv.error.not_found")}, 404)
+                    ctype = "image/png" if path.lower().endswith(".png") else "image/jpeg"
+                    try:
+                        self._file(path, ctype)
+                    except OSError:
+                        return self._json({"error": tr("srv.error.not_found")}, 404)
                 elif self.path in ("/", "/index.html", "/calibrate", "/demo", "/demo/simple", "/vr"):
                     page = {"/calibrate": CALIBRATE_FILE, "/demo": DEMO_FILE,
                             "/demo/simple": DEMO_SIMPLE_FILE, "/vr": VR_FILE}.get(self.path, UI_FILE)
