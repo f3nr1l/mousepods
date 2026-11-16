@@ -13,12 +13,15 @@ import re
 import shutil
 import time
 
+import trackir_tables
+
 DLLS = ("NPClient.dll", "NPClient64.dll", "freetrackclient.dll", "freetrackclient64.dll")
 DIR_NAME = "mousepods"
 BACKUP = "user.reg.before-mousepods"
 KEY_NPCLIENT = r"Software\\NaturalPoint\\NATURALPOINT\\NPClient Location"
 KEY_FREETRACK = r"Software\\Freetrack\\FreeTrackClient"
 KEY_MOUSEPODS = r"Software\\MousePods"
+KEY_TABLE = r"Software\\MousePods\\Table"   # TrackIR "Enhanced" tables, see trackir_tables.py
 OUR_PATH = r"C:\\mousepods\\"           # as written in user.reg (escaped backslashes)
 
 
@@ -154,7 +157,8 @@ def _check(game, is_running):
         raise BridgeError("running")
 
 
-def install(game, dll_dir, pose_file, is_running=process_running):
+def install(game, dll_dir, pose_file, is_running=process_running, tables=None):
+    """tables: {TrackIR id: 8-byte table}; None reads opentrack's list (trackir_tables.load)."""
     _check(game, is_running)
     missing = [n for n in DLLS if not os.path.isfile(os.path.join(dll_dir, n))]
     if missing:
@@ -172,6 +176,9 @@ def install(game, dll_dir, pose_file, is_running=process_running):
         text = _set_section(text, key, ['"Path"="%s"' % OUR_PATH])
     win_pose = "Z:" + pose_file.replace("/", "\\")
     text = _set_section(text, KEY_MOUSEPODS, ['"PoseFile"="%s"' % _reg_escape(win_pose)])
+    tables = trackir_tables.load() if tables is None else tables
+    if tables:
+        text = _set_section(text, KEY_TABLE, trackir_tables.reg_lines(tables))
     _write_reg(reg, text)
 
 
@@ -185,9 +192,9 @@ def uninstall(game, is_running=process_running):
         before = f.read()
     with open(reg, encoding="utf-8", errors="surrogateescape") as f:
         text = f.read()
-    for key in (KEY_NPCLIENT, KEY_FREETRACK, KEY_MOUSEPODS):
+    for key in (KEY_NPCLIENT, KEY_FREETRACK, KEY_MOUSEPODS, KEY_TABLE):
         current = _value(text, key, "Path")
-        if key != KEY_MOUSEPODS and current is not None and current != OUR_PATH:
+        if key in (KEY_NPCLIENT, KEY_FREETRACK) and current is not None and current != OUR_PATH:
             continue                     # another tracker took this key over after us: leave it
         text = _drop_section(text, key)
         span = _sections(before).get(key.lower())

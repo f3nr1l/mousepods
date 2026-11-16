@@ -38,7 +38,9 @@ Head-tracking bridge for Proton/Wine games (native/), contributed by Henning Nor
   opentrack's npclient originates from linux-track by uglyDwarf
   (https://github.com/uglyDwarf/linuxtrack), MIT licence. The FreeTrack
   protocol types (native/fttypes.h) were translated by the FaceTrackNoIR /
-  FreeTrack teams.
+  FreeTrack teams. native/trackir_games.csv is opentrack's
+  "settings/facetracknoir supported games.csv" (same ISC licence); the TrackIR
+  "Enhanced" table decoding in trackir_tables.py follows opentrack's csv/csv.cpp.
 
 Head-tracker HID headsets (hid_headtracker.py): protocol details and axis mapping from
   SonyTrackerLinux, Copyright (c) kdani3 — https://github.com/kdani3/SonyTrackerLinux — MIT licence:
