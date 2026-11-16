@@ -982,6 +982,7 @@
  "v2.cockpit": "Cockpit demo",
  "v2.cockpit_hint": "Look around a 3D cockpit with your head",
  "v2.connected_idle": "Connected, waiting for the motion sensors",
+ "v2.eyebrow": "Head tracking",
  "v2.game_on": "Head tracking on",
  "v2.games_hint": "Tick a Steam game and its camera follows your head",
  "v2.gaps": "{n} gaps",

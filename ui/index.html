@@ -360,17 +360,35 @@ code{background:var(--btn);padding:1px 6px;border-radius:5px;font-family:"Adwait
 .cue.go .t{color:var(--green)}.cue.rest .t{color:var(--text2)}
 .exp{color:var(--orange);font-weight:600}
 /* ---------- overview (new look only) */
-.hero{display:flex;flex-wrap:wrap;align-items:center;gap:26px;background:var(--side);border-radius:14px;padding:20px 24px}
-.hero svg.plot{flex:none;width:164px;height:164px}
-.hero .who{flex:1;min-width:220px;display:flex;flex-direction:column;gap:7px}
-.hero .who h1{font-size:26px}
-.hero .who .st{color:var(--text2)}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.hero{position:relative;overflow:hidden;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:30px;
+  background:var(--card);border-radius:18px;padding:26px 30px}
+.hero::before{content:"";position:absolute;left:-90px;top:50%;width:420px;height:420px;transform:translateY(-50%);
+  background:radial-gradient(circle,var(--accent-soft) 0,transparent 62%);pointer-events:none}
+.hero>*{position:relative}
+.hero svg.plot{width:184px;height:184px;display:block}
+.hero .who{display:flex;flex-direction:column;gap:10px;min-width:0}
+.hero .who h1{font-size:30px;line-height:1.1}
+.hero .eyebrow{font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-text)}
+.hero .st{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;min-height:30px;padding:0 12px;border-radius:999px;
+  background:var(--btn);color:var(--text2);font-size:13px}
+.hero .st::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--text2);flex:none}
+.hero.live .st{color:var(--text)}.hero.live .st::before{background:var(--green)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:0 12px;border-radius:999px;background:var(--btn);font-size:13px}
 .chip b{font-variant-numeric:tabular-nums}
-.hero dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;min-width:240px}
-.hero dt{color:var(--text2);font-size:12.5px}.hero dd{font-size:20px;font-weight:700;margin:4px 0 6px}
-.lvl{height:5px;border-radius:3px;background:var(--sw-off);overflow:hidden}.lvl i{display:block;height:100%;border-radius:3px;background:var(--green)}
+.bats{display:flex;gap:18px}
+.bats .b{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12.5px;color:var(--text2)}
+.bats .ring{width:68px;height:68px}.bats .ring .bg{stroke:var(--btn)}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px}
+.tile{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:var(--card);color:var(--text);text-decoration:none;min-width:0}
+a.tile:hover{background:color-mix(in srgb,var(--card) 88%,var(--text))}
+.tile .ti{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;background:var(--accent-soft);color:var(--accent-text)}
+.tile .ti svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tile .tt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile .tt small{color:var(--text2);font-size:12.5px}
+.tile .tt b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:1000px){.hero{grid-template-columns:auto minmax(0,1fr)}.hero .bats{grid-column:1/-1}}
+@media (max-width:640px){.hero{grid-template-columns:1fr;justify-items:center;text-align:center}.hero .st{align-self:center}.tiles{grid-template-columns:1fr}}
 .cols{display:flex;flex-wrap:wrap;gap:26px;align-items:flex-start;margin-top:26px}
 .cols>*{flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:26px}
 .group>h2{margin:0 4px 8px;display:flex;justify-content:space-between;align-items:baseline}
@@ -439,7 +457,7 @@ a.lrow:hover,button.lrow:hover{background:var(--line)}
 <div class="adw-only">
   <section class="hero" aria-label="AirPods">
     <svg class="plot" viewBox="0 0 164 164" role="img" aria-labelledby="hx-plot-l"><title id="hx-plot-l" data-i18n="v2.plot_title">Live head position</title>
-      <rect style="fill:var(--plot)" width="164" height="164" rx="12"/>
+      <circle style="fill:var(--plot)" cx="82" cy="82" r="80"/>
       <circle style="stroke:var(--plot-line)" cx="82" cy="82" r="66" fill="none"/><circle style="stroke:var(--plot-line)" cx="82" cy="82" r="33" fill="none"/>
       <path style="stroke:var(--plot-line)" d="M82 10v144M10 82h144"/>
       <polyline style="stroke:var(--accent)" id="hx-trail" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".45" points=""/>
@@ -447,6 +465,7 @@ a.lrow:hover,button.lrow:hover{background:var(--line)}
       <circle style="fill:var(--accent)" id="hx-dot" cx="82" cy="82" r="7"/>
     </svg>
     <div class="who">
+      <span class="eyebrow" data-i18n="v2.eyebrow">Head tracking</span>
       <h1 id="hx-name">AirPods</h1>
       <span class="st" id="hx-status" data-i18n="overview.connecting">Connexion…</span>
       <div class="chips" id="hx-chips">
@@ -456,8 +475,13 @@ a.lrow:hover,button.lrow:hover{background:var(--line)}
       </div>
       <span class="hint" id="hx-plot-hint" data-i18n="v2.plot_hint">The dot follows your head. Exact angles appear while a game or opentrack uses the head tracking.</span>
     </div>
-    <dl id="hx-bat"></dl>
+    <div class="bats" id="hx-bat"></div>
   </section>
+  <div class="tiles">
+    <a class="tile" href="#settings" data-go="settings"><span class="ti"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 8-6 1.5L10 19z"/></svg></span><span class="tt"><small data-i18n="overview.mode">Mode</small><b id="hx-t-mode">—</b></span></a>
+    <a class="tile" href="#settings" data-go="settings"><span class="ti"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4a4 4 0 0 0-4 4v1a4 4 0 0 0 4 4v7M15 4a4 4 0 0 1 4 4v1a4 4 0 0 1-4 4v7"/></svg></span><span class="tt"><small data-i18n="overview.source">Source</small><b id="hx-t-src">—</b></span></a>
+    <a class="tile" href="#calib" data-go="calib"><span class="ti"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></span><span class="tt"><small data-i18n="calib.calibration">Calibration</small><b id="hx-t-cal">—</b></span></a>
+  </div>
   <div class="cols">
     <div>
       <section class="group" aria-labelledby="hx-mouse-h"><h2 id="hx-mouse-h" data-i18n="v2.mouse">Mouse</h2>
@@ -1001,9 +1025,12 @@ function renderHero(tm){
   const parts=live?[t("v2.streaming"),tm.ear&&tm.ear.length?tm.ear.join(" · "):null,`${tm.rate} Hz`,tm.gaps?t("v2.gaps",{n:tm.gaps}):null]
     :[tm.connected?t("v2.connected_idle"):(tm.status||t("js.ov.searching"))];
   setText($("#hx-status"),parts.filter(Boolean).join(" · "));
+  const hero=$(".hero");if(hero.classList.contains("live")!==!!live)hero.classList.toggle("live",!!live);
+  setText($("#hx-t-mode"),({souris:t("overview.mouse"),pointeur:t("overview.pointer"),glisse:t("overview.glide")})[tm.mode]||"—");
+  setText($("#hx-t-src"),SRC(tm.source)||"—");
   const bats=(tm.battery||[]).filter(b=>b.state!=="disconnected");
-  setHtml($("#hx-bat"),bats.map(b=>{const lv=b.level,col=lv!=null&&lv<=20?"var(--red)":"var(--green)";
-    return `<div><dt>${esc(b.part)}</dt><dd>${lv==null?"—":lv+"%"}${b.state==="charging"?` <small class="hint">${esc(b.state_label||"")}</small>`:""}</dd><div class="lvl" title="${esc(b.state_label||"")}"><i style="width:${lv||0}%;background:${col}"></i></div></div>`}).join(""));
+  setHtml($("#hx-bat"),bats.map(b=>{const lv=b.level,col=lv!=null&&lv<=20?"var(--red)":b.state==="charging"?"var(--accent)":"var(--green)";
+    return `<div class="b" title="${esc(b.state_label||"")}">${lv==null?'<svg class="ring" viewBox="0 0 84 84"><circle class="bg" cx="42" cy="42" r="36"/><text x="42" y="47" text-anchor="middle" font-size="16" font-weight="650" fill="currentColor">—</text></svg>':ring(lv,col)}<span>${esc(b.part)}</span></div>`}).join(""));
   if(Date.now()>hxOnUntil)$("#hx-on").checked=!tm.paused;
   setText($("#hx-mode-hint"),({souris:t("v2.mode_hint.souris"),pointeur:t("v2.mode_hint.pointeur"),glisse:t("v2.mode_hint.glisse")})[tm.mode]||"");
   setText($("#hx-src-hint"),`${t("js.ov.detected",{place:({ear:t("js.place.ear"),case:t("js.place.case"),out:t("js.place.out")})[tm.place]||"—"})} → ${t("js.source_src",{src:SRC(tm.source)})}`);
@@ -1011,7 +1038,8 @@ function renderHero(tm){
   const g=tm.gestures;setText($("#hx-gest"),g?(g.enabled?t("v2.on"):t("v2.off")):"—")}
 function renderHeroState(s){const name=(s.info||[]).find(i=>i.key==="info.name");
   setText($("#hx-name"),ANON?(s.model||"AirPods"):(name?name.value:(s.model||"AirPods")));
-  setText($("#hx-calib"),s.profile_key?(s.calibrated?t("v2.calib_done",{profile:s.profile_key}):t("js.calib.todo")):"—")}
+  setText($("#hx-calib"),s.profile_key?(s.calibrated?t("v2.calib_done",{profile:s.profile_key}):t("js.calib.todo")):"—");
+  setText($("#hx-t-cal"),s.profile_key?(s.calibrated?t("v2.ready"):t("js.calib.todo")):"—")}
 let heroGamesAt=0;
 function loadHeroGames(){if(Date.now()-heroGamesAt<10000)return;heroGamesAt=Date.now();
   fetch("/api/games").then(r=>r.json()).then(d=>{const on=(d.games||[]).filter(g=>g.enabled),box=$("#hx-games");

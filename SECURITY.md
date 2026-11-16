@@ -4,8 +4,9 @@
 
 | Version | Supported |
 |---|---|
-| 1.1.x (Flatpak stable, `main`) | ✅ |
-| 1.0.x | ❌ please update |
+| 1.3.x (Flatpak stable, `main`) | ✅ |
+| 1.2.x | ⚠️ fixes go into 1.3, please update |
+| 1.1.x and older | ❌ please update |
 
 ## Reporting a vulnerability
 
@@ -22,7 +23,10 @@ MousePods runs on your computer and talks to your earbuds. The parts that matter
   website and the browser extension, which may only read the head pose and recenter.
 - The virtual mouse and joystick through `/dev/uinput`.
 - The Bluetooth connection to the earbuds (it only reads sensor streams; it never touches firmware).
-- The head-tracking DLLs placed in Proton prefixes by the Games page (`native/`).
+- The head-tracking DLLs placed in Proton prefixes by the Games page (`native/`), and the registry
+  values the game bridge writes into those prefixes (`user.reg`, TrackIR tables).
+- The experimental Windows driver in `windows/aap-poc` (test-signed proof of concept, not shipped in
+  any release): reports are welcome, fixes are best effort.
 - The Flatpak repository and its signing key.
 
 Out of scope: bugs in BlueZ, the kernel, Wine/Proton or the games themselves.
