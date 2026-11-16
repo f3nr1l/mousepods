@@ -1444,7 +1444,7 @@ function gameCard(g){const p=g.profile,dis=!g.has_prefix||g.running;
       ${g.enabled?`<div class="hint">${t("js.games.steam_switch_off")}</div>`:""}`:""}
     ${gameHint(g)?`<div class="hint">${esc(gameHint(g))}</div>`:""}
     ${g.launch_option_hint?`<div class="hint">${esc(t("js.games.hint_launch_option"))}</div>`:""}
-    ${g.wine?`<div class="kv"><span class="hint mono">${esc(g.prefix)}</span><span><button class="btn sm" data-wine-remove ${g.enabled?"disabled":""}>${t("js.games.wine_remove")}</button></span></div>`:""}
+    ${g.wine?`<div class="kv"><span class="hint mono">${esc(g.prefix)}</span><span><button class="btn sm" data-wine-remove ${g.enabled&&g.has_prefix?"disabled":""}>${t("js.games.wine_remove")}</button></span></div>`:""}
     <details><summary>${t("js.games.profile")}${g.proton?" · "+esc(g.proton.split("/").pop()):""}</summary>
       <div class="row" style="margin:8px 0"><button class="btn sm p" data-calibrate>${t("js.games.calibrate")}</button>
         <span class="hint">${t("js.games.calibrate_hint")}</span></div>
@@ -1465,17 +1465,20 @@ function readProfile(card,prev){const v=f=>card.querySelector(`[data-f="${f}"]`)
     const pos=num(q("edge_pos")),neg=r.querySelector('[data-f="edge_neg"]')?num(q("edge_neg")):pos;
     axes[n]={enabled:q("enabled").checked,invert:q("invert").checked,edge_neg:neg,edge_pos:pos,target:num(q("target")),curve:sensToCurve(num(q("sens")))}});
   return {smoothing:num(v("smoothing")),neck:{enabled:v("neck.enabled").checked,strength:num(v("neck.strength")),lean_forward:v("neck.lean_forward").checked},axes,monitors:(prev&&prev.monitors)||[],own:true}}
-function gameError(r){return r.json().then(j=>{throw new Error(j.error||r.status)})}
+function gameError(r){return r.json().then(j=>{const e=new Error(j.error||r.status);e.code=j.code;e.path=j.path;throw e})}
 function postGame(appid,body){return fetch("/api/games/"+encodeURIComponent(appid),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
   .then(r=>r.ok?r.json():gameError(r))}
 // a game outside Steam: a name and its Wine prefix (Lutris, Heroic, Bottles, LUG Helper, plain Wine)
 function wineForm(){return `<div class="card" data-wine-form><b>${t("js.games.wine_title")}</b><div class="hint">${t("js.games.wine_hint")}</div>
   <div class="row" style="gap:10px;flex-wrap:wrap;margin-top:8px"><label>${t("js.games.wine_name")} <input type="text" data-wine-name maxlength="80"></label>
   <label>${t("js.games.wine_prefix")} <input type="text" data-wine-path size="34" placeholder="~/Games/star-citizen"></label>
-  <button class="btn sm p" data-wine-add>${t("js.games.wine_add")}</button></div></div>`}
+  <button class="btn sm p" data-wine-add>${t("js.games.wine_add")}</button></div><div data-wine-msg></div></div>`}
 function wireWineForm(box){const f=box.querySelector("[data-wine-form]");if(!f)return;
   f.querySelector("[data-wine-add]").onclick=()=>{const name=f.querySelector("[data-wine-name]").value,prefix=f.querySelector("[data-wine-path]").value;
-    postGame("wine",{name,prefix}).then(r=>{toast(t("js.games.toast_wine_added",{name:r.game.name}));loadGames()}).catch(err=>toast(err.message))}}
+    const msg=f.querySelector("[data-wine-msg]");msg.innerHTML="";
+    postGame("wine",{name,prefix}).then(r=>{toast(t("js.games.toast_wine_added",{name:r.game.name}));loadGames()}).catch(err=>{
+      if(err.code!=="prefix_hidden"||!err.path)return toast(err.message);
+      msg.innerHTML=`<div class="hint" style="margin-top:8px">${esc(t("js.games.hint_prefix_hidden"))}<br><code>flatpak override --user --filesystem=${esc(err.path)} io.github.starman_tech.MousePods</code></div>`})}}
 function renderGames(){const box=$("#games-list");if(!gamesData)return;
   const steamGames=gamesData.games.filter(g=>!g.wine);
   const empty=!gamesData.steam_found?`<div class="card empty">${esc(t("js.games.no_steam"))}</div>`:!steamGames.length?`<div class="card empty">${esc(t("js.games.no_games"))}</div>`:"";
@@ -1484,7 +1487,9 @@ function renderGames(){const box=$("#games-list");if(!gamesData)return;
   wireWineForm(box);
   box.querySelectorAll(".game").forEach(card=>{const appid=card.dataset.appid,g=gamesData.games.find(x=>x.appid===appid);
     card.querySelector("[data-toggle]").onchange=e=>{const on=e.target.checked;e.target.disabled=true;
-      postGame(appid,{enabled:on}).then(()=>{toast(on?t("js.games.toast_on",{name:g.name}):t("js.games.toast_off",{name:g.name}));loadGames()})
+      const send=body=>postGame(appid,body).then(()=>{toast(on?t("js.games.toast_on",{name:g.name}):t("js.games.toast_off",{name:g.name}));loadGames()});
+      // Flatpak: a game outside Steam cannot be seen running, the user confirms it is closed
+      send({enabled:on}).catch(err=>{if(err.code==="confirm_closed"&&confirm(t("js.games.confirm_closed",{name:g.name})))return send({enabled:on,closed_confirmed:true});throw err})
         .catch(err=>{toast(err.message);loadGames()})};
     card.querySelectorAll('details input[type=range]').forEach(inp=>{const o=document.createElement("output");o.className="prev";
       const show=()=>o.textContent=" "+(+inp.value).toFixed(inp.step<1?(inp.step<0.1?2:1):0);show();inp.after(o);inp.addEventListener("input",show)});

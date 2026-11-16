@@ -29,9 +29,10 @@ class BridgeError(Exception):
     """code: no_prefix | running | missing_dll | no_backup | switch_off_first
     (games outside Steam: bad_name | bad_prefix | prefix_hidden | already_added)"""
 
-    def __init__(self, code):
+    def __init__(self, code, path=None):
         super().__init__(code)
         self.code = code
+        self.path = path            # prefix_hidden: the folder to allow in the Flatpak
 
 
 def _reg_escape(path):
@@ -204,11 +205,22 @@ def install(game, dll_dir, pose_file, is_running=process_running, tables=None):
     _write_reg(reg, text)
 
 
+def _table_values(lines):
+    """{name: value} of registry lines. Wine rewrites user.reg after a session (#time= lines,
+    values sorted as text), so the table is compared as a dict, not line by line."""
+    out = {}
+    for ln in lines:
+        name, sep, value = ln.strip().partition("=")
+        if sep and not ln.lstrip().startswith("#"):
+            out[name] = value.lower()
+    return out
+
+
 def _table_lines(text):
     span = _sections(text).get(KEY_TABLE.lower())
     if not span:
         return None
-    return [ln for ln in text[span[0]:span[1]].splitlines()[1:] if ln.strip()]
+    return text[span[0]:span[1]].splitlines()[1:]
 
 
 def refresh_tables(game, is_running=process_running, tables=None):
@@ -224,7 +236,8 @@ def refresh_tables(game, is_running=process_running, tables=None):
     with open(reg, encoding="utf-8", errors="surrogateescape") as f:
         text = f.read()
     lines = trackir_tables.reg_lines(tables)
-    if _table_lines(text) == lines:
+    current = _table_lines(text)
+    if current is not None and _table_values(current) == _table_values(lines):
         return False
     _write_reg(reg, _set_section(text, KEY_TABLE, lines))
     return True

@@ -1149,7 +1149,7 @@ class WebUI:
                 try:
                     gid, entry = games_service.add_wine(ui.cfg_path, body.get("name"), body.get("prefix"))
                 except bridge_install.BridgeError as e:
-                    return self._json({"error": tr("games.error." + e.code), "code": e.code}, 409)
+                    return self._json({"error": tr("games.error." + e.code), "code": e.code, "path": e.path}, 409)
                 m.update_config_file(ui.cfg_path, {"wine_games": {gid: entry}})
                 return self._json({"ok": True, "appid": gid, "game": entry})
 
@@ -1159,6 +1159,9 @@ class WebUI:
                 game = games_service.find(appid, ui.cfg_path)
                 if game is None:
                     return self._json({"error": tr("srv.error.not_found")}, 404)
+                if ("enabled" in body and games_service.needs_closed_confirmation(game.appid)
+                        and body.get("closed_confirmed") is not True):
+                    return self._json({"error": tr("games.error.confirm_closed"), "code": "confirm_closed"}, 409)
                 try:
                     if "enabled" in body:
                         entry = games_service.set_enabled(ui.cfg_path, game, bool(body["enabled"]))

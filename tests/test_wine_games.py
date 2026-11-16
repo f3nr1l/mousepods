@@ -11,11 +11,13 @@ import tempfile
 import unittest
 import urllib.error
 import urllib.request
+from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "tests"))
 import bridge_install as bi  # noqa: E402
+import games_service  # noqa: E402
 import game_bridge  # noqa: E402
 import steam_games as sg  # noqa: E402
 from test_bridge_install import DLLS, OPENTRACK_REG  # noqa: E402
@@ -91,6 +93,41 @@ class WineGamesApiTests(unittest.TestCase):
                          "bad_prefix")
         self.assertEqual(self.post_error("/api/games/wine", {"name": "X", "prefix": "/"})[1]["code"], "bad_prefix")
         self.assertEqual(self.post_error("/api/games/wine-nothere", {"enabled": True})[0], 404)
+
+    def test_prefix_gone_while_on_can_be_removed(self):
+        prefix = self.make_prefix()
+        self.post("/api/games/wine", {"name": "Star Citizen", "prefix": prefix})
+        self.post("/api/games/wine-starcitizen", {"enabled": True})
+        shutil.rmtree(prefix)
+        [g] = self.wine()
+        self.assertEqual((g["enabled"], g["has_prefix"]), (True, False))
+        self.post("/api/games/wine-starcitizen", {"remove": True})
+        self.assertEqual(self.wine(), [])
+        self.assertIsNone(self.saved()["games"]["wine-starcitizen"])
+
+    def test_flatpak_asks_to_confirm_the_game_is_closed(self):
+        prefix = self.make_prefix()
+        self.post("/api/games/wine", {"name": "Star Citizen", "prefix": prefix})
+        with mock.patch.object(games_service, "in_flatpak", lambda: True):
+            self.assertEqual(self.post_error("/api/games/wine-starcitizen", {"enabled": True})[1]["code"],
+                             "confirm_closed")
+            self.assertEqual(self.wine()[0]["status"], "foreign")          # nothing changed
+            self.post("/api/games/wine-starcitizen", {"enabled": True, "closed_confirmed": True})
+            self.assertEqual(self.wine()[0]["status"], "on")
+            self.assertEqual(games_service.refresh_tables(self.cfg_path), [])   # never on its own there
+
+    def test_flatpak_hidden_folder_gives_its_path(self):
+        missing = os.path.join(self.home, "elsewhere", "sc")
+        with mock.patch.object(games_service, "in_flatpak", lambda: True):
+            code, err = self.post_error("/api/games/wine", {"name": "SC", "prefix": missing})
+        self.assertEqual((code, err["code"], err["path"]), (409, "prefix_hidden", missing))
+
+    def test_pfx_link_is_resolved(self):
+        real = self.make_prefix("Games/real")
+        os.makedirs(os.path.join(self.home, "Games/lutris"))
+        os.symlink(real, os.path.join(self.home, "Games/lutris/pfx"))
+        added = self.post("/api/games/wine", {"name": "SC", "prefix": os.path.join(self.home, "Games/lutris")})
+        self.assertEqual(added["game"]["prefix"], real)
 
     def test_running_game_is_not_touched(self):
         prefix = self.make_prefix()
@@ -170,6 +207,18 @@ class RefreshTablesTests(unittest.TestCase):
         self.assertEqual(self.reg(), before)
         bi.uninstall(self.game, lambda a: False)
         self.assertNotIn("Table", self.reg())
+
+    def test_table_rewritten_by_wine_is_not_rewritten_again(self):
+        bi.install(self.game, self.dlls, "/dev/shm/x/pose-wine-sc", lambda a: False, tables=TABLES | {13: bytes(8)})
+        reg = self.reg()
+        # what wine leaves after a session: #time= line, values sorted as text, upper-case hex
+        wine = reg.replace('"13"=hex:00,00,00,00,00,00,00,00\n"3450"=hex:34,4e,ce,f4,a2,b4,c6,3e',
+                           '#time=1dc5a0b2c3d4e5f\n"3450"=hex:34,4E,CE,F4,A2,B4,C6,3E\n"13"=hex:00,00,00,00,00,00,00,00')
+        self.assertNotEqual(wine, reg)
+        with open(os.path.join(self.prefix, "user.reg"), "w") as f:
+            f.write(wine)
+        self.assertFalse(bi.refresh_tables(self.game, lambda a: False, TABLES | {13: bytes(8)}))
+        self.assertEqual(self.reg(), wine)
 
     def test_game_not_ours_is_left_alone(self):
         self.assertFalse(bi.refresh_tables(self.game, lambda a: False, TABLES))

@@ -136,11 +136,11 @@ def resolve_prefix(path):
     path = os.path.realpath(os.path.expanduser((path or "").strip()))
     if not path or path == "/":
         raise bridge_install.BridgeError("bad_prefix")
-    for candidate in (path, os.path.join(path, "pfx")):
+    for candidate in (path, os.path.realpath(os.path.join(path, "pfx"))):
         if os.path.isfile(os.path.join(candidate, "user.reg")):
             return candidate
     if not os.path.exists(path) and in_flatpak():
-        raise bridge_install.BridgeError("prefix_hidden")    # outside what the sandbox may see
+        raise bridge_install.BridgeError("prefix_hidden", path)    # outside what the sandbox may see
     raise bridge_install.BridgeError("bad_prefix")
 
 
@@ -162,9 +162,18 @@ def add_wine(cfg_path, name, prefix):
 
 
 def remove_wine(cfg_path, game):
-    """Forget a game outside Steam; only while it is off, so no bridge stays behind in its prefix."""
+    """Forget a game outside Steam; only while it is off, so no bridge stays behind in its prefix.
+    A prefix that is gone holds no bridge any more: then it goes even if it was on."""
+    if not game.prefix:
+        return
     if (saved_games(cfg_path).get(game.appid) or {}).get("enabled") or bridge_install.status(game) == "on":
         raise bridge_install.BridgeError("switch_off_first")
+
+
+def needs_closed_confirmation(appid):
+    """In the Flatpak, MousePods sees only its own processes: whether a game outside Steam runs
+    cannot be known, so the user confirms it is closed before its prefix is changed."""
+    return bool(WINE_ID.match(str(appid))) and in_flatpak()
 
 
 def refresh_tables(cfg_path):
@@ -174,6 +183,8 @@ def refresh_tables(cfg_path):
     for appid, entry in saved.items():
         if not (entry or {}).get("enabled"):
             continue
+        if needs_closed_confirmation(appid):
+            continue                     # cannot tell whether it runs: only on the user's word
         game = find(appid, cfg_path)
         if game is None or not game.prefix:
             continue
