@@ -972,22 +972,32 @@ function renderPagebar(tm){const b=$("#pb-pause");setText(b,tm.paused?t("js.resu
 $("#pb-pause").onclick=()=>post("/api/cmd",{cmd:T.paused?"resume":"pause"});
 let hxOnUntil=0;
 $("#hx-on").onchange=e=>{hxOnUntil=Date.now()+1500;post("/api/cmd",{cmd:e.target.checked?"resume":"pause"})};
-const HX={x:0,y:0,trail:[],at:0};
+// The overview is open most of the time, so it must stay cheap: telemetry arrives 30 times a second
+// and in the desktop app every DOM change is a full repaint on the GPU. The plot is only touched when
+// the dot moves by half a pixel or more, at most 20 times a second; text changes at most once a second.
+const HX={x:0,y:0,trail:[],at:0,drawAt:0,key:"",textAt:0};
 function fmtDeg(v){return (v>=0?"+":"−")+Math.abs(v).toFixed(1)+"°"}
+function setAttr(el,a,v){if(el.getAttribute(a)!==v)el.setAttribute(a,v)}
+function setHidden(el,h){if(el.hidden!==h)el.hidden=h}
 function renderHero(tm){
   const now=performance.now(),dt=HX.at?Math.min((now-HX.at)/1000,0.2):0;HX.at=now;
   const pose=Array.isArray(tm.pose)?tm.pose:null,R=66,clamp=v=>Math.max(-1,Math.min(1,v));
   if(pose){HX.x=clamp(pose[0]/30);HX.y=clamp(pose[1]/30)}
-  else{const r=tm.rates||[0,0,0],k=Math.exp(-dt/0.5);   // no angles: the dot follows the head's turn and drifts back
-    HX.x=clamp(HX.x*k+(+r[0]||0)*dt/60);HX.y=clamp(HX.y*k+(+r[1]||0)*dt/60)}
-  const x=82+HX.x*R,y=82-HX.y*R;
-  HX.trail.push([x,y]);if(HX.trail.length>14)HX.trail.shift();
-  const dot=$("#hx-dot"),halo=$("#hx-halo");dot.setAttribute("cx",x.toFixed(1));dot.setAttribute("cy",y.toFixed(1));
-  halo.setAttribute("cx",x.toFixed(1));halo.setAttribute("cy",y.toFixed(1));
-  $("#hx-trail").setAttribute("points",HX.trail.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" "));
-  const live=tm.connected&&tm.live;dot.style.opacity=halo.style.opacity=live?"1":".35";
-  $("#hx-chips").hidden=!pose;$("#hx-plot-hint").hidden=!!pose||!live;
-  if(pose){setText($("#hx-yaw"),fmtDeg(pose[0]));setText($("#hx-pitch"),fmtDeg(pose[1]));setText($("#hx-roll"),fmtDeg(pose[2]))}
+  else{const r=tm.rates||[0,0,0],k=Math.exp(-dt/0.5),dz=v=>Math.abs(v)<2?0:v;   // no angles: the dot follows the head's turn and drifts back
+    HX.x=clamp(HX.x*k+dz(+r[0]||0)*dt/60);HX.y=clamp(HX.y*k+dz(+r[1]||0)*dt/60)}
+  const live=tm.connected&&tm.live;
+  if(now-HX.drawAt>=50){
+    const x=Math.round((82+HX.x*R)*2)/2,y=Math.round((82-HX.y*R)*2)/2,key=x+","+y;
+    if(key!==HX.key){HX.key=key;HX.trail.push(key);if(HX.trail.length>12)HX.trail.shift()}
+    else if(HX.trail.length>1)HX.trail.shift();                 // still: the trail shrinks back into the dot
+    HX.drawAt=now;
+    const dot=$("#hx-dot"),halo=$("#hx-halo");
+    setAttr(dot,"cx",String(x));setAttr(dot,"cy",String(y));setAttr(halo,"cx",String(x));setAttr(halo,"cy",String(y));
+    setAttr($("#hx-trail"),"points",HX.trail.join(" "));
+    setAttr(dot,"opacity",live?"1":".35");setAttr(halo,"opacity",live?"1":".35")}
+  setHidden($("#hx-chips"),!pose);setHidden($("#hx-plot-hint"),!!pose||!live);
+  if(pose&&now-(HX.poseAt||0)>=250){HX.poseAt=now;setText($("#hx-yaw"),fmtDeg(pose[0]));setText($("#hx-pitch"),fmtDeg(pose[1]));setText($("#hx-roll"),fmtDeg(pose[2]))}
+  if(now-HX.textAt<1000)return;HX.textAt=now;
   const parts=live?[t("v2.streaming"),tm.ear&&tm.ear.length?tm.ear.join(" · "):null,`${tm.rate} Hz`,tm.gaps?t("v2.gaps",{n:tm.gaps}):null]
     :[tm.connected?t("v2.connected_idle"):(tm.status||t("js.ov.searching"))];
   setText($("#hx-status"),parts.filter(Boolean).join(" · "));
@@ -1059,8 +1069,9 @@ $$("#p-settings input[data-k], #p-sims input[data-k], #p-overview input[data-k]"
 });
 function fmt(v,step){const d=(step+"").includes(".")?(step+"").split(".")[1].length:0;return v.toFixed(Math.min(d,3))}
 function fillSettings(cfg){lookFromConfig(cfg);$$("#p-settings input[data-k], #p-sims input[data-k], #p-overview input[data-k]").forEach(inp=>{const k=inp.dataset.k;if(k===editing)return;const v=getK(cfg,k);
-  if(inp.type==="range"){if(v!==undefined){inp.value=v;inp.parentElement.querySelector("output").textContent=fmt(+v,inp.step)}}
-  else inp.checked=!!v})}
+  // runs every second: only touch what changed, every write would repaint the page
+  if(inp.type==="range"){if(v!==undefined){if(+inp.value!==+v)inp.value=v;setText(inp.parentElement.querySelector("output"),fmt(+v,inp.step))}}
+  else if(inp.checked!==!!v)inp.checked=!!v})}
 // ---------- calibration
 let calSrc="auto",calFlow=null;
 $$("#cal-flow button").forEach(b=>b.onclick=()=>{calFlow=b.dataset.v;$$("#cal-flow button").forEach(x=>x.classList.toggle("on",x===b));
@@ -1113,13 +1124,13 @@ function renderTelemetry(){
   renderWizard();
   const now=performance.now(),showRate=!tm.connected||now-rateShownAt>=1000||page!==ratePage;
   if(showRate){rateShownAt=now;ratePage=page;setText($("#side-rate"),tm.connected?`${tm.rate} Hz · ${SRC(tm.source)||""}`:"")}
-  if(page==="overview"){
+  if(page==="overview"){syncSeg("mode",tm.mode);syncSeg("source",tm.source_cfg)}
+  if(page==="overview"&&LOOK.skin==="classic"){         // the classic overview (hidden in the new look)
     setText($("#ov-state"),tm.paused?t("js.ov.paused"):(tm.calib&&tm.calib.active?t("js.ov.calibration"):t("js.ov.active")));
     setText($("#ov-state-sub"),`${({souris:t("js.ov.mode_mouse"),pointeur:t("js.ov.mode_pointer"),glisse:t("js.ov.mode_glide")})[tm.mode]} · ${t("js.source_src",{src:SRC(tm.source)})}${tm.scroll?" · "+t("js.ov.scrolling"):""}`);
     setText($("#ov-toggle"),tm.paused?t("js.resume"):t("js.pause"));
     if(showRate)setText($("#ov-rate"),tm.connected?String(tm.rate):"—");
     setText($("#ov-gaps"),tm.connected?String(tm.gaps):"—");{const c=tm.gaps>3?"var(--orange)":"";if($("#ov-gaps").style.color!==c)$("#ov-gaps").style.color=c}
-    syncSeg("mode",tm.mode);syncSeg("source",tm.source_cfg);
     setText($("#ov-src-hint"),`${t("js.ov.detected",{place:({ear:t("js.place.ear"),case:t("js.place.case"),out:t("js.place.out")})[tm.place]||"—"})} → ${t("js.source_src",{src:SRC(tm.source)})}`);
     const bats=(tm.battery||[]).map(b=>{const col=b.level!=null&&b.level<=20?"var(--red)":b.state==="charging"?"var(--green)":"var(--accent)";
       return `<div class="card bat">${b.state==="disconnected"||b.level==null?'<div class="ring" style="display:grid;place-items:center;color:var(--text2)">—</div>':ring(b.level,col)}<b>${b.part}</b><small>${b.state_label}</small></div>`});
@@ -1233,12 +1244,12 @@ $("#wz-done").onclick=()=>post("/api/autostart",{enabled:$("#wz-autostart-on").c
 function hideInFlatpak(){if(!S.flatpak)return;$$('#nav a[data-p="garmin"]').forEach(a=>a.style.display="none")}
 function renderState(){checkWizard();renderWizard();renderBaseline();hideInFlatpak();if(LOOK.skin==="adwaita")renderHeroState(S);
   const s=ANON?anonymize(S):S;
-  $("#side-model").textContent=s.model||"—";
+  setText($("#side-model"),String(s.model||"—"));
   const name=(s.info||[]).find(i=>i.key==="info.name");
-  $("#ov-name").textContent=name?name.value:(s.model||"AirPods");
-  $("#ov-sub").textContent=s.addr?`${s.model||""} · ${s.addr}`:t("js.ov.searching");
-  $("#ov-proto").textContent=s.protocol||"—";
-  $("#ov-prof").innerHTML=s.profile_key?(s.calibrated?`<span class="pill g">✓ ${esc(s.profile_key)}</span>`:`<span class="pill o">${t("js.calib.todo")}</span>`):"—";
+  setText($("#ov-name"),String(name?name.value:(s.model||"AirPods")));
+  setText($("#ov-sub"),String(s.addr?`${s.model||""} · ${s.addr}`:t("js.ov.searching")));
+  setText($("#ov-proto"),String(s.protocol||"—"));
+  setHtml($("#ov-prof"),s.profile_key?(s.calibrated?`<span class="pill g">✓ ${esc(s.profile_key)}</span>`:`<span class="pill o">${t("js.calib.todo")}</span>`):"—");
   if(s.config)fillSettings(s.config);
   if(page==="calib"){
     if(!calFlow)$$("#cal-flow button").forEach(x=>x.classList.toggle("on",x.dataset.v===(T.mode||"souris")));
@@ -1498,7 +1509,7 @@ function calibResult(r){const c=calib,box=c.box,f=v=>Math.round(v*10)/10;
     c.save(res,tg,c.sel).then(()=>{box.innerHTML="";calib=null}).catch(e=>toast(e.message))}}
 // baseline calibration on the Calibration page: default for every game without own values + pointer edges
 function renderBaseline(){const b=S&&S.config&&S.config.game_baseline,el=$("#cal-base-now");if(!el)return;
-  el.textContent=b&&b.yaw?t("js.games.res_values",{l:Math.round(b.yaw.neg),r:Math.round(b.yaw.pos),u:Math.round(b.pitch.pos),d:Math.round(b.pitch.neg)}):t("js.calib_ui.no_baseline")}
+  setText(el,b&&b.yaw?t("js.games.res_values",{l:Math.round(b.yaw.neg),r:Math.round(b.yaw.pos),u:Math.round(b.pitch.pos),d:Math.round(b.pitch.neg)}):t("js.calib_ui.no_baseline"))}
 function startBaseline(){const b=(S&&S.config&&S.config.game_baseline)||{};
   calibBegin({box:$("#cal-base-panel"),saved:b.monitors||[],targets:{side:b.target_side??180,vert:b.target_vert??90},
     save:(r,tg,sel)=>post("/api/calibration",{action:"save_baseline",...r,target_side:tg.side,target_vert:tg.vert,monitors:sel})
