@@ -275,10 +275,16 @@ h2{font-size:14.5px;font-weight:700;color:var(--text);margin:28px 4px 10px}
 .btn:focus-visible,nav a:focus-visible,.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 /* toggle group */
-.seg{display:inline-flex;background:var(--seg);border-radius:9px;padding:3px;gap:3px;flex-wrap:wrap}
-.seg button{border:0;background:transparent;color:var(--text);font:inherit;font-weight:500;min-height:30px;padding:0 14px;border-radius:7px;cursor:pointer}
+/* equal columns, one line, same weight when selected: picking an option never moves the others */
+.seg{display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;align-items:stretch;background:var(--seg);border-radius:9px;padding:3px;gap:3px;max-width:100%;vertical-align:middle}
+.seg button{border:0;background:transparent;color:var(--text);font:inherit;font-weight:500;min-height:32px;padding:0 14px;border-radius:7px;cursor:pointer;
+  white-space:nowrap;display:flex;align-items:center;justify-content:center;line-height:1.2;transition:background .12s}
 .seg button:hover{background:var(--line)}
-.seg button.on{background:var(--seg-on);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.seg button.on{background:var(--seg-on);box-shadow:0 1px 2px rgba(0,0,0,.14)}
+.lrow.stack .seg{display:grid;width:100%}
+/* blocks that follow each other on a page keep a gap (some pages stack cards without a grid) */
+.page>.card+.card,.page>.card+.grid,.page>.grid+.card,.page>.grid+.grid,.page>.card+div,.page>div+.card,#p-sims>.card{margin-top:14px}
+.page>.sub+.card,.page>.sub+.grid,.page>h2+.card,.page>h2+.grid,#p-sims>.sub+.card{margin-top:0}
 /* switch */
 .sw{position:relative;width:48px;height:26px;flex:none;display:inline-block}
 .sw input{opacity:0;width:0;height:0;position:absolute}
@@ -1026,8 +1032,14 @@ $$(".seg[data-key]").forEach(seg=>seg.querySelectorAll("button").forEach(b=>b.on
   if(seg.dataset.key==="ui_skin"||seg.dataset.key==="ui_scheme"){const k=seg.dataset.key;
     applyLook(k==="ui_skin"?b.dataset.v:LOOK.skin,k==="ui_scheme"?b.dataset.v:LOOK.scheme);setCfg({[k]:b.dataset.v},t("js.toast.saved"));return}
   if(seg.dataset.key==="ui_lang"){post("/api/config",{ui_lang:b.dataset.v}).then(()=>loadI18n()).then(()=>{refreshState();renderVersion();toast(t("js.toast.language"))});return}
-  setCfg({[seg.dataset.key]:b.dataset.v},seg.dataset.key==="mode"?t("js.toast.mode",{name:b.textContent}):t("js.toast.source",{name:b.textContent}));
-  seg.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b))}));
+  const key=seg.dataset.key;SEG_PENDING[key]={v:b.dataset.v,until:Date.now()+2500};
+  setCfg({[key]:b.dataset.v},key==="mode"?t("js.toast.mode",{name:b.textContent}):t("js.toast.source",{name:b.textContent}));
+  $$(`.seg[data-key="${key}"] button`).forEach(x=>x.classList.toggle("on",x.dataset.v===b.dataset.v))}));
+// The live stream still reports the old value until the controller has reloaded its config: a choice
+// made here wins for a moment, so the buttons do not flick back and forth after a click.
+const SEG_PENDING={};
+function syncSeg(key,v){const p=SEG_PENDING[key];if(p){if(v!==p.v&&Date.now()<p.until)return;delete SEG_PENDING[key]}
+  $$(`.seg[data-key="${key}"] button`).forEach(b=>b.classList.toggle("on",b.dataset.v===v))}
 // ---------- réglages
 function getK(cfg,k){return k.split(".").reduce((o,p)=>o&&o[p],cfg)}
 function mkObj(k,v){const p=k.split(".");return p.length===1?{[k]:v}:{[p[0]]:{[p[1]]:v}}}
@@ -1101,8 +1113,7 @@ function renderTelemetry(){
     setText($("#ov-toggle"),tm.paused?t("js.resume"):t("js.pause"));
     if(showRate)setText($("#ov-rate"),tm.connected?String(tm.rate):"—");
     setText($("#ov-gaps"),tm.connected?String(tm.gaps):"—");{const c=tm.gaps>3?"var(--orange)":"";if($("#ov-gaps").style.color!==c)$("#ov-gaps").style.color=c}
-    $$(".seg[data-key=mode] button").forEach(b=>b.classList.toggle("on",b.dataset.v===tm.mode));
-    $$(".seg[data-key=source] button").forEach(b=>b.classList.toggle("on",b.dataset.v===tm.source_cfg));
+    syncSeg("mode",tm.mode);syncSeg("source",tm.source_cfg);
     setText($("#ov-src-hint"),`${t("js.ov.detected",{place:({ear:t("js.place.ear"),case:t("js.place.case"),out:t("js.place.out")})[tm.place]||"—"})} → ${t("js.source_src",{src:SRC(tm.source)})}`);
     const bats=(tm.battery||[]).map(b=>{const col=b.level!=null&&b.level<=20?"var(--red)":b.state==="charging"?"var(--green)":"var(--accent)";
       return `<div class="card bat">${b.state==="disconnected"||b.level==null?'<div class="ring" style="display:grid;place-items:center;color:var(--text2)">—</div>':ring(b.level,col)}<b>${b.part}</b><small>${b.state_label}</small></div>`});
