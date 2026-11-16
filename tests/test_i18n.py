@@ -145,3 +145,12 @@ class LanguageSwitchTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PlaceholderNamedKeyTests(unittest.TestCase):
+    """A translation whose placeholder is called {key} (tk.calib.saved) must not collide with
+    tr()'s own first parameter: the end of the first calibration crashed on it."""
+
+    def test_key_placeholder(self):
+        i18n.clear_cache()
+        self.assertEqual(i18n.tr("tk.calib.saved", "en", key="2027_head"), "Profile saved: 2027_head")

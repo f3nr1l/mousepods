@@ -16,6 +16,17 @@ import airpods_mouse_controller as m  # noqa: E402
 
 
 class ConfigWriteTests(unittest.TestCase):
+    def test_missing_file_is_created_and_profiles_merge(self):
+        # first calibration on a fresh install: config.json does not exist yet
+        d = tempfile.mkdtemp()
+        path = os.path.join(d, "config.json")
+        m.update_config_file(path, {"profiles": {"2027_head": {"a": 1}}})
+        m.update_config_file(path, {"profiles": {"2027_case": {"b": 2}}})
+        with open(path) as f:
+            profiles = json.load(f)["profiles"]
+        shutil.rmtree(d)
+        self.assertEqual(profiles, {"2027_head": {"a": 1}, "2027_case": {"b": 2}})
+
     def test_concurrent_updates_are_all_kept(self):
         d = tempfile.mkdtemp()
         path = os.path.join(d, "config.json")
